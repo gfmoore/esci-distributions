@@ -1,0 +1,56 @@
+<!--
+Program       index.html 
+Author        Gordon Moore
+Date          15 July 2020
+Description   A JavaScript implementation of ESCI Normal and T for Introduction to the New Statistics by Geoff Cumming and Robert Calin-Jageman
+Licence       GNU General Public LIcence Version 3, 29 June 2007
+-->
+<!-- #region version history-->
+<!--
+0.0.1       Initial version
+
+
+-->
+<!--endregion -->
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+  <head>
+    <meta charset=utf-8>
+    <!-- <meta name="viewport" content="width=device-width"> not work? allow touch and click to be the same -->
+
+    <!--to fix issue of android chrome reducing font size to tiny (unless big paragraph of text)   -->
+    <meta name="HandheldFriendly" content="true"/>
+    <!--might need this at some point?, though it disables pinch zoom-->
+    <!--<meta name="viewport" content="width=device-width, maximum-scale=1.0, user-scalable=yes">-->
+    
+    <!--clear favicon cache-->
+    <link rel="shortcut icon" href="./favicon.ico?v=2">  
+
+    <title>esci-normal</title>
+
+    <!-- stylesheets -->
+    <link href=./css/escinormal.css rel=stylesheet>
+
+    <!-- scripts -->
+    <script src=https://code.jquery.com/jquery-3.5.0.js
+            integrity="sha256-r/AaFHrszJtwpe+tHyNi/XCfMxYpbsRg2Uqn0x3s2zc=" 
+            crossorigin="anonymous">
+    </script>
+
+    <script src=https://cdn.jsdelivr.net/npm/jstat@latest/dist/jstat.min.js defer></script>
+
+    <script src=https://d3js.org/d3.v5.min.js defer></script>
+
+    <script src=./js/escinormal.js defer></script>
+
+  </head>
+
+  <body>
+    <h1>esci-normal</h1>
+    
+
+  </body>
+</html>
