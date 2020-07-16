@@ -29,10 +29,13 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
     <!--clear favicon cache-->
     <link rel="shortcut icon" href="./favicon.ico?v=2">  
 
-    <title>esci-normal</title>
+    <title>esci-web Main Menu</title>
 
     <!-- stylesheets -->
-    <link href=./css/escinormal.css rel=stylesheet>
+    <link rel="stylesheet" type="text/css" href="./css/tooltipster.bundle.min.css" />
+
+    <link href=./css/esci.css rel=stylesheet>
+    <link href=./css/esci-normal.css rel=stylesheet>
 
     <!-- scripts -->
     <script src=https://code.jquery.com/jquery-3.5.0.js
@@ -40,17 +43,41 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
             crossorigin="anonymous">
     </script>
 
-    <script src=https://cdn.jsdelivr.net/npm/jstat@latest/dist/jstat.min.js defer></script>
+    <script type="text/javascript" src="./js/tooltipster.bundle.min.js"></script>
 
-    <script src=https://d3js.org/d3.v5.min.js defer></script>
-
-    <script src=./js/escinormal.js defer></script>
+    <script src=./js/esci-normal.js defer></script>
 
   </head>
 
   <body>
-    <h1>esci-normal</h1>
-    
+    <div id=main>
+
+      <div id=leftpanel>
+        <!----------------------------------Main heading---------------------------------->
+        <div id=header>
+          <div id=logo><img id=logoimg src=./images/logo.png></div>
+          <div id=mainheading>esci web</div>
+          <div id=subheading>Normal</div>
+          <div id=tooltipsonoff>?</div>
+        </div>
+
+        <!--------------------------------Control---------------------------->
+
+        <div id=control>
+
+        </div>
+
+        <!---------------------------------Footer---------------------------------------------->
+        <div id=footer>
+          <div id=footerlink data-tooltip>Please click here to return to the New Statistics website.</div>
+        </div>
+      </div>
+
+      <div id=rightpanel>
+
+      </div>
+
+    </div>
 
   </body>
 </html>

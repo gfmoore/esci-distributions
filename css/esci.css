@@ -1,0 +1,144 @@
+/*
+Program       esci.css
+Author        Gordon Moore
+Date          14 July 2020
+Description   CSS for esci
+Licence       GNU General Public LIcence Version 3, 29 June 2007
+*/
+
+/* #region Version history
+
+0.0.1       Initial version
+
+#endregion */
+
+
+/*-------------------------------------------------------------------------------------------*/
+/*default font size*/
+:root {
+  --fontsize: 1.3rem;
+}
+
+html {
+  width: 100%;
+  height: 100%;
+  font-size: 62.5%;
+}
+
+body {
+  background-color: lightyellow;
+  font-family: Verdana, sans-serif;
+  font-size: var(--fontsize);
+  color: blue;
+  height: calc(100% - 2rem);
+  overflow-x: hidden; 
+}
+
+label {
+  font: normal var(--fontsize) Verdana !important;
+  user-select: none;
+}
+
+select {
+  font-size: var(--fontsize) !important;
+}
+
+option {
+  font-size: var(--fontsize) !important;
+}
+
+input[type=text] {
+  padding:5px; 
+  border: 1px solid #ccc; 
+  border-radius: 5px;
+  width: 4rem;
+  height: 1.2rem;
+  font-size: var(--fontsize);
+}
+
+.greek {
+  font-size: var(--fontsize);
+}
+
+.italic {
+  font-style: italic;
+  font-size: var(--fontsize);
+}
+
+/*------------------------------------------Main Panel-------------------------------------------------*/
+
+#main {
+  /*split into left and right panels*/
+  display: grid;
+  grid-template-columns: 40rem auto;
+  grid-column-gap: 8px;
+  height: 100%;
+} 
+
+/*--------------------------------------------Left Panel-----------------------------------------------*/
+
+#leftpanel {
+  border: 2px solid black; 
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+/*-------------------------------------------Main heading-----------------------------------------------*/
+#header {
+  border: 1px solid black;
+  display: grid;
+  grid-template-columns: 5rem 12rem auto 2rem;
+}
+
+#logoimg {
+  max-width: 4rem;
+  max-height: 4rem;
+}
+
+#mainheading {
+  font-size: 2.5rem;
+} 
+
+#subheading {
+  margin-left: 1.0rem;
+  padding: 0.4rem;
+  font-size: 2.0rem;
+}
+
+#tooltipsonoff {
+  border: 1px solid black;
+  background-color: lightgrey;
+  height: 1.5rem;
+  width: 1.4rem;
+  margin-top: 0.8rem;
+  text-align: center;
+  border-radius: 1rem;
+}
+
+/*--------------------------------------------Menu items-----------------------------------------------*/
+
+
+/*--------------------------------------------Footer----------------------------------------------------*/
+
+#footer {
+  float:left;
+  bottom: 5px;
+
+  border: 1px solid black;
+  color: #0c43f8;
+  background-color: #e8eef0e3;
+  padding: 0.3rem;
+  clear: both;
+  width: auto;
+}
+
+#footer:hover {
+  background-color: palegreen;
+}
+
+#footer:active {
+  background-color: green;
+}
+
+
+/*--------------------------------------------right Panel-----------------------------------------------*/
