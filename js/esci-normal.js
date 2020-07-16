@@ -1,8 +1,8 @@
 /*
-Program       esci.js
+Program       esci-normal.js
 Author        Gordon Moore
 Date          14 July 2020
-Description   The JavaScript code for esci-wb
+Description   The JavaScript code for esci-normal
 Licence       GNU General Public LIcence Version 3, 29 June 2007
 */
 
@@ -24,6 +24,8 @@ $(function() {
 
   //#endregion
 
+  setTooltips();
+
   initialise();
 
   function initialise() {
@@ -36,9 +38,26 @@ $(function() {
 
   
 
-
-
   /*---------------------------------------------Tooltips on or off-------------------------------------- */
+
+  function setTooltips() {
+    Tipped.setDefaultSkin('esci');
+
+    //heading section
+    Tipped.create('#logo', 'Version: '+version, { skin: 'red', size: 'xlarge' });
+    Tipped.create('#tooltipsonoff', 'Allow tooltips on or off, default is off!', { skin: 'esci', size: 'xlarge' });
+
+    Tipped.create('#mainheading', 'From The New Statistics: ', { skin: 'esci', size: 'xlarge' });
+    Tipped.create('#subheading', 'https://thenewstatistics.com', { skin: 'esci', size: 'xlarge' });
+
+
+
+    
+    //footer
+    Tipped.create('#footerlink', 'Return to the New Statistics website. ', { skin: 'esci', size: 'xlarge' });
+
+    Tipped.disable('[data-tooltip]');
+  }
 
   $('#tooltipsonoff').on('click', function() {
     if (tooltipson) {
@@ -48,8 +67,10 @@ $(function() {
     else {
       tooltipson = true;
       $('#tooltipsonoff').css('background-color', 'lightgreen');
+      Tipped.enable('[data-tooltip]');
     }
   })
+
 
   /*----------------------------------------------------------footer----------------------------------------*/
  
