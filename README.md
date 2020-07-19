@@ -1,4 +1,4 @@
-# esci-distribution
+# esci-distributions
 
 This is a JavaScript implementation of the esci software (Exploratory Software for Confidence Intervals) that accompanies: 
 

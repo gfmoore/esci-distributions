@@ -1,8 +1,8 @@
 /*
-Program       esci-normal.js
+Program       esci-distributions.js
 Author        Gordon Moore
 Date          14 July 2020
-Description   The JavaScript code for esci-normal
+Description   The JavaScript code for esci-distributions
 Licence       GNU General Public LIcence Version 3, 29 June 2007
 */
 
