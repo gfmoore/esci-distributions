@@ -8,7 +8,7 @@ by Geoff Cumming and Robert Calin-Jageman
 https://thenewstatistics.com/
 
 
-[Introduction to the New Statistics](images/ITNS the cover 2 Feb 16.png?raw=true "Introduction to the New Statistics")
+![Introduction to the New Statistics](images/ITNS-the-cover-2-Feb-16.png?raw=true "Introduction to the New Statistics")
 
 ## Current version 0.0.1
 
