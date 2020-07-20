@@ -20,7 +20,13 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 #rightpanel {
   border: 1px solid grey;
   display: grid;
-  grid-template-rows: 70% auto;
+  grid-template-rows: 5rem 50% 5rem auto;
+}
+
+/*---------------------------------top axis---------------------------------------------------------*/
+
+#topaxis {
+  background-color: white;
 }
 
 /*----------------------------------pdf-------------------------------------------------------------*/
@@ -30,8 +36,24 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
   background-color: white;
 }
 
+/*---------------------------------top axis---------------------------------------------------------*/
+
+#bottomaxis {
+  background-color: white;
+}
+
 /*----------------------------------slider-----------------------------------------------------------*/
 
 #sliderdisplay {
   border: 1px solid blue;
+}
+
+
+/*---------------------------------svg style----------------------------------------------------------*/
+
+.normalpdf {
+  fill: white;
+  stroke-width: 3px;
+  stroke: blue;
+
 }

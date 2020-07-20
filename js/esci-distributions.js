@@ -24,16 +24,27 @@ $(function() {
 
   const pdfdisplay = document.querySelector('#pdfdisplay');
 
-      
+
+  let realHeight = 100;
   let margin = {top: 0, right: 10, bottom: 0, left: 10}; 
   let width;
   let height;               //the true width of the pdf display area in pixels
+  let heighttopaxis;
+  let heightbottomaxis;
   let heightP;              //the true width of the pdf display area in pixels
 
-  let x, y;                 //scale functions
+  let xt, xb, y;            //scale functions
 
+  let svgTopAxis;           //svg reference to the top axis
+  let svgBottomAxis;        //svg reference to the bottom axis
   let svgP;                 //the svg reference to pdfdisplay
 
+
+  let mu, sigma, df;        //the population mean, standard deviation and degrees of freedom
+  let zmu, zsd;          //parametrs of normal distribution
+
+  let normalpdf = [];       //the array holding the normal distribution
+  let tpdf = [];            //the array holding the student t distribution
 
   //#endregion
 
@@ -58,13 +69,32 @@ $(function() {
     width  = $('#pdfdisplay').outerWidth(true);
     height = $('#pdfdisplay').outerHeight(true);
 
+    //these are fixed so do I need to be responsive?
+    heighttopaxis    = $('#topaxis').outerHeight(true);
+    heightbottomaxis = $('#bottomaxis').outerHeight(true);
+
     //do this once?
     //set a reference to the displaypdf area
     d3.selectAll('svg > *').remove();  //remove all elements under svgP
     $('svg').remove();                 //remove the all svg elements from the DOM
 
+    //axes
+    svgTopAxis = d3.select('#topaxis').append('svg').attr('width', '100%').attr('height', '100%');
+    svgBottomAxis = d3.select('#bottomaxis').append('svg').attr('width', '100%').attr('height', '100%');
+
+    //pdf display
     svgP = d3.select('#pdfdisplay').append('svg').attr('width', '100%').attr('height', '100%');
-    
+
+
+    //initialvalues - pick these up from textboxes/sliders or dropdowns
+    mu     = 100;
+    sigma  = 15;
+
+    zmu    = 0;
+    zsd    = 1;
+    df     = 1000;
+
+        
     resize();
 
   }
@@ -83,38 +113,88 @@ $(function() {
   }
 
   function clear() {
-    setupPdfDisplay();
-    topHorizonatlAxis();
-    bottomHorizontalAxis();
-    leftVerticalAxis();
+    setupDisplay();
+
+    createNormal();
+    createT();
+
+    removeNormalPDF();
+    drawNormalPDF();
   }
 
-  function setupPdfDisplay() {
- 
-    scalePdfDrawing();
+  function setupDisplay() {
+
+    //the height is 0 - 100 in real world coords
+    //the width is either -5 to +5 or 25 to 175 etc in real world coords
+
+    //clear axes
+    d3.selectAll('.topaxis').remove();
+    d3.selectAll('.bottomaxis').remove();
+
+    xt = d3.scaleLinear().domain([25, 175]).range([margin.left, width]);
+    xb = d3.scaleLinear().domain([-5, 5]).range([margin.left, width]);
+    y = d3.scaleLinear().domain([0, realHeight]).range([heightP, 0]);
+
+    //top horizontal axis
+    let xAxisA = d3.axisTop(xt);
+    svgTopAxis.append('g').attr('class', 'topaxis').attr( 'transform', 'translate(0, 40)' ).call(xAxisA);
+
+    //bottom horizontal axis
+    let xAxisB = d3.axisBottom(xb);
+    svgBottomAxis.append('g').attr('class', 'bottomaxis').attr( 'transform', 'translate(0, 0)' ).call(xAxisB);
   }
   
+  function createNormal() {
+    normalpdf = [];
 
+    for (let x = -5.0; x <= 5.0; x += 0.005) {
+      normalpdf.push({ x: x, y: jStat.normal.pdf(x, zmu, zsd) })
+    }
 
-  function scalePdfDrawing() {
-    x = d3.scaleLinear().domain([-5, 5]).range([margin.left, width]);
-    y = d3.scaleLinear().domain([0, 100]).range([heightP, 0]);
+    //scale it to fit in with drawing area
+    let functionHeight = d3.max(normalpdf, function(d) { return d.y});
+    normalpdf.forEach(function(v) {
+      v.y = v.y * realHeight / functionHeight * 0.9 + 0.2;
+    })
+
   }
 
-  function topHorizonatlAxis() {
+  function drawNormalPDF() {
+    //create a generator
+    line = d3.line()
+      .x(function(d, i) { return xb(d.x); })
+      .y(function(d, i) { return y(d.y); });
+
+    //display the curve
+    svgP.append('path').attr('class', 'normalpdf').attr('d', line(normalpdf))
 
   }
 
-  function bottomHorizontalAxis() {
-    let xAxisB = d3.axisBottom(x);
-    svgP.append('g').attr('class', 'axisxb').attr( 'transform', `translate(0, +20)` ).call(xAxisB);
+  function removeNormalPDF() {
+    d3.selectAll('.normalpdf').remove();
   }
 
-  function leftVerticalAxis() {
+  function showNormalPDF() {
+    d3.selectAll('.normalpdf').show();
+  }
 
+  function hideNormalPDF() {
+    d3.selectAll('.normalpdf').hide();
   }
 
   
+  function createT() {
+    tpdf = [];
+    for (let x = -5; x < 5; x += 0.1) {
+      tpdf.push({ x: x, y: jStat.studentt.pdf(x, df) })
+    }
+
+    //scale it to fit in with drawing area
+    let functionHeight = d3.max(tpdf, function(d) { return d.y});
+    tpdf.forEach(function(v) {
+      v.y = v.y * realHeight / functionHeight * sigma;
+    })
+  }
 
   /*---------------------------------------------Tooltips on or off-------------------------------------- */
 
