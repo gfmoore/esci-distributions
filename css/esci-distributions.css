@@ -1,7 +1,7 @@
 /*
 Program       esci-distributions.css
 Author        Gordon Moore
-Date          14 July 2020
+Date          25 July 2020
 Description   CSS for esci distributions
 Licence       GNU General Public LIcence Version 3, 29 June 2007
 */
@@ -12,8 +12,47 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 
 #endregion */
 
+/*---------------------------------icons-----------------------------------------------------------*/
 
-/*----------------------------------control side 9set in esci.css---------------------------------------------------------*/
+.icons {
+  width: 3rem;
+  height: 3rem;
+}
+
+/*----------------------------------control side  (set in esci.css)--------------------------------*/
+
+.greek2 {
+  font-size: 2.5rem;
+}
+
+
+#musigmadiv {
+  display: grid;
+  grid-template-columns: 5rem 25rem 5rem;
+  grid-row-gap: 3rem;
+  margin-top: 2rem;
+}
+
+#mudiv {
+padding-top: 2rem; 
+margin-left: 1rem;
+}
+
+#sigmadiv {
+  padding-top: 2rem; 
+  margin-left: 1rem;
+}
+
+#muval {
+  margin-top: 3rem;
+  margin-left: 2rem;
+}
+
+#sigmaval {
+  margin-top: 3rem;
+  margin-left: 2rem;
+}
+
 
 
 /*----------------------------------display---------------------------------------------------------*/
@@ -44,16 +83,41 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 
 /*----------------------------------slider-----------------------------------------------------------*/
 
-#sliderdisplay {
-  border: 1px solid blue;
+#sliderdisplayarea {
+  display: grid;
+  grid-template-columns: 3rem 3rem auto 3rem 3rem;
 }
 
+.slidericons {
+  margin-top: 2.4rem;
+}
+
+.slidericons:hover {
+  background-color: lightgray;
+}
+
+.slidericons:active {
+  background-color: darkgrey;
+}
+
+.criticalregionlefttail {
+  fill: lightsteelblue;
+  stroke-width: 0;
+}
+
+.criticalregionrighttail {
+  fill: lightsteelblue;
+  stroke-width: 0;
+}
 
 /*---------------------------------svg style----------------------------------------------------------*/
 
 .normalpdf {
-  fill: white;
+  fill: none;
   stroke-width: 3px;
   stroke: blue;
-
 }
+
+
+/*-----------------------------------------------------------------------------------------------------*/
+

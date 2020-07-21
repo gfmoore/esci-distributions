@@ -1,7 +1,7 @@
 /*
 Program       esci-distributions.js
 Author        Gordon Moore
-Date          14 July 2020
+Date          25 July 2020
 Description   The JavaScript code for esci-distributions
 Licence       GNU General Public LIcence Version 3, 29 June 2007
 */
@@ -20,33 +20,44 @@ $(function() {
 
 
   //#region for variable definitions (just allows code folding)
-  let tooltipson = false;   //toggle the tooltips on or off
+  let tooltipson = false;                                   //toggle the tooltips on or off
 
-  const pdfdisplay = document.querySelector('#pdfdisplay');
+  const pdfdisplay = document.querySelector('#pdfdisplay'); //display of pdf area
 
 
-  let realHeight = 100;
-  let margin = {top: 0, right: 10, bottom: 0, left: 10}; 
+  let realHeight = 100;                                     //the real world height for the pdf display area
+  let margin = {top: 0, right: 10, bottom: 0, left: 70};    //margins for pdf display area
   let width;
-  let height;               //the true width of the pdf display area in pixels
-  let heighttopaxis;
-  let heightbottomaxis;
-  let heightP;              //the true width of the pdf display area in pixels
+  let height;                                               //the true width of the pdf display area in pixels
+  let heightP;                                               //the true width of the pdf display area in pixels
 
-  let xt, xb, y;            //scale functions
+  let xt, xb, y;                                            //scale functions
 
-  let svgTopAxis;           //svg reference to the top axis
-  let svgBottomAxis;        //svg reference to the bottom axis
-  let svgP;                 //the svg reference to pdfdisplay
+  let svgTopAxis;                                           //svg reference to the top axis
+  let svgBottomAxis;                                        //svg reference to the bottom axis
+  let svgP;                                                 //the svg reference to pdfdisplay
 
 
-  let mu, sigma, df;        //the population mean, standard deviation and degrees of freedom
-  let zmu, zsd;          //parametrs of normal distribution
+  let mu, sigma, df;                                        //the population mean, standard deviation and degrees of freedom
+  let zmu, zsd;                                             //parametrs of normal distribution
 
-  let normalpdf = [];       //the array holding the normal distribution
-  let tpdf = [];            //the array holding the student t distribution
+  let normalpdf = [];                                       //the array holding the normal distribution
+  let tpdf = [];                                            //the array holding the student t distribution
 
-  //#endregion
+  let functionHeight;                                       //get max height of pdf function
+  let dfrom, dto;                                           //frequency density (height) on pdf
+
+  let $zslider;                                              //reference to slider
+  let zfrom, zto;                                            //the current from to values on the slider
+
+  //cache jquery properties (faster)
+  $mu    = $('#muval');
+  $sigma = $('#sigmaval');
+
+  const $leftnudgebackward  = $('#leftnudgebackward')
+  const $leftnudgeforward  =  $('#leftnudgeforward');
+  const $rightnudgebackward = $('#rightnudgebackward')
+  const $rightnudgeforward =  $('#rightnudgeforward');
 
   //api for getting width, height of element - only gets element, not entire DOM
   // https://www.digitalocean.com/community/tutorials/js-resize-observer
@@ -57,12 +68,22 @@ $(function() {
     });
   });
 
-
-
+  //#endregion
 
   initialise();
 
   function initialise() {
+
+    //initialvalues - pick these up from textboxes/sliders or dropdowns
+    mu     = 100;
+    sigma  = 15;
+
+    zmu    = 0;
+    zsd    = 1;
+    df     = 1000;
+
+    setupSliders()
+
     setTooltips();
 
     //get initial values for height/width
@@ -85,18 +106,114 @@ $(function() {
     //pdf display
     svgP = d3.select('#pdfdisplay').append('svg').attr('width', '100%').attr('height', '100%');
 
-
-    //initialvalues - pick these up from textboxes/sliders or dropdowns
-    mu     = 100;
-    sigma  = 15;
-
-    zmu    = 0;
-    zsd    = 1;
-    df     = 1000;
-
-        
     resize();
 
+  }
+
+  function setupSliders() {
+
+    $('#muslider').ionRangeSlider({
+      skin: 'big',
+      type: 'single',
+      min: 0,
+      max: 200,
+      from: mu,
+      step: 1,
+      grid: true,
+      grid_num: 10,
+      //on slider handles change
+      onChange: function (data) {
+        mu = data.from;
+        $mu.val(mu);
+        setTopAxis();
+      }
+    })
+
+    $('#sigmaslider').ionRangeSlider({
+      skin: 'big',
+      type: 'single',
+      min: 0,
+      max: 100,
+      from: sigma, 
+      step: 1,
+      grid: true,
+      grid_num: 10,
+      //on slider handles change
+      onChange: function (data) {
+        sigma = data.from;
+        $sigma.val(sigma);
+        setTopAxis();
+      }
+    })
+
+    $('.js-range-slider').ionRangeSlider({
+      skin: 'big',
+      type: 'double',
+      min: -5,
+      max: 5,
+      from: -5,
+      to: 5,
+      step: 0.01,
+      grid: true,
+      grid_num: 10,
+      //on slider handles change
+      onChange: function (data) {
+        //want to refer to these values elsewhere
+        zfrom = data.from;
+        zto   = data.to;
+        drawCriticalValueLines(zfrom, zto);
+      }
+    })
+
+    //get reference to sliders
+    $muslider    = $("#muslider").data("ionRangeSlider");
+    $sigmaslider = $("#sigmaslider").data("ionRangeSlider");
+    $zslider     = $(".js-range-slider").data("ionRangeSlider");
+
+    $mu.val(mu);
+    $sigma.val(sigma);
+    zfrom = -5;
+    zto = 5;
+  }
+
+  function drawCriticalValueLines(from, to) {
+    removeCriticalTails()
+
+    dfrom = scaleypdf(jStat.normal.pdf(from, zmu, zsd));
+    dto =   scaleypdf(jStat.normal.pdf(to, zmu, zsd));
+
+    svgP.append('line').attr('class', 'criticalvalueline').attr('x1', xb(from)).attr('y1', y(0)).attr('x2', xb(from)).attr('y2', y(dfrom)).attr('stroke', 'black').attr('stroke-width', 2);
+    svgP.append('line').attr('class', 'criticalvalueline').attr('x1', xb(to)).attr('y1', y(0)).attr('x2', xb(to)).attr('y2', y(dto)).attr('stroke', 'black').attr('stroke-width', 2);
+
+    arealefttail = d3.area()
+      .x(function(d) { return xb(d.x) })
+      .y1(y(0))
+      .y0(function(d) { if (d.x < from) return y(d.y); else return y(0); });
+
+    svgP.append('path').attr('class', 'criticalregionlefttail').attr('d', arealefttail(normalpdf));
+
+    arearighttail = d3.area()
+      .x(function(d) { return xb(d.x) })
+      .y1(y(0))
+      .y0(function(d) { if (d.x > to) return y(d.y); else return y(0); });      
+
+    svgP.append('path').attr('class', 'criticalregionrighttail').attr('d', arearighttail(normalpdf));
+
+    drawNormalPDF();
+  }
+
+  function removeCriticalTails() {
+    svgP.selectAll('.criticalvalueline').remove();
+    svgP.selectAll('.criticalregionlefttail').remove();
+    svgP.selectAll('.criticalregionrighttail').remove();
+  }
+
+  //not used on resize
+  function resetCriticalTails() {
+    $zslider.update( {
+      from: -5,
+      to: 5
+    })
   }
 
   function resize() {
@@ -109,6 +226,8 @@ $(function() {
     width   = width - margin.left - margin.right;  
     heightP = height - margin.top - margin.bottom;
 
+
+
     clear();
   }
 
@@ -118,32 +237,51 @@ $(function() {
     createNormal();
     createT();
 
+    removeCriticalTails();
+    //resetCriticalTails();
     removeNormalPDF();
     drawNormalPDF();
+    drawCriticalValueLines(zfrom, zto)
+
   }
 
   function setupDisplay() {
 
     //the height is 0 - 100 in real world coords
-    //the width is either -5 to +5 or 25 to 175 etc in real world coords
+    y = d3.scaleLinear().domain([0, realHeight]).range([heightP, 0]);
 
+    setTopAxis();
+    setBottomAxis();
+
+  }
+  
+  function setTopAxis() {
     //clear axes
     d3.selectAll('.topaxis').remove();
-    d3.selectAll('.bottomaxis').remove();
+    
+    let left  = mu-5*sigma
+    let right = mu+5*sigma
 
-    xt = d3.scaleLinear().domain([25, 175]).range([margin.left, width]);
-    xb = d3.scaleLinear().domain([-5, 5]).range([margin.left, width]);
-    y = d3.scaleLinear().domain([0, realHeight]).range([heightP, 0]);
+    xt = d3.scaleLinear().domain([left, right]).range([margin.left, width]);
 
     //top horizontal axis
     let xAxisA = d3.axisTop(xt);
     svgTopAxis.append('g').attr('class', 'topaxis').attr( 'transform', 'translate(0, 40)' ).call(xAxisA);
+    
+  }
+
+  function setBottomAxis() {
+    //the width is either -5 to +5 or 25 to 175 etc in real world coords
+    //clear axes
+    d3.selectAll('.bottomaxis').remove();
+    xb = d3.scaleLinear().domain([-5, 5]).range([margin.left, width]);
 
     //bottom horizontal axis
     let xAxisB = d3.axisBottom(xb);
     svgBottomAxis.append('g').attr('class', 'bottomaxis').attr( 'transform', 'translate(0, 0)' ).call(xAxisB);
+
   }
-  
+
   function createNormal() {
     normalpdf = [];
 
@@ -152,14 +290,19 @@ $(function() {
     }
 
     //scale it to fit in with drawing area
-    let functionHeight = d3.max(normalpdf, function(d) { return d.y});
+    functionHeight = d3.max(normalpdf, function(d) { return d.y});
     normalpdf.forEach(function(v) {
-      v.y = v.y * realHeight / functionHeight * 0.9 + 0.2;
+      v.y = scaleypdf(v.y);
     })
 
   }
 
+  function scaleypdf(y) {
+    return y * realHeight / functionHeight * 0.9 + 0.2;
+  }
+
   function drawNormalPDF() {
+    removeNormalPDF();
     //create a generator
     line = d3.line()
       .x(function(d, i) { return xb(d.x); })
@@ -167,7 +310,6 @@ $(function() {
 
     //display the curve
     svgP.append('path').attr('class', 'normalpdf').attr('d', line(normalpdf))
-
   }
 
   function removeNormalPDF() {
@@ -195,6 +337,49 @@ $(function() {
       v.y = v.y * realHeight / functionHeight * sigma;
     })
   }
+
+
+  //for some very weird reason the event was triggering three times!!!  https://stackoverflow.com/questions/14969960/jquery-click-events-firing-multiple-times 
+  $leftnudgebackward.on('click', function(e) {
+    if (zfrom > -5) zfrom -= 0.01;
+    $zslider.update( { from: zfrom, })
+    drawCriticalValueLines(zfrom, zto);
+  })
+
+  $leftnudgeforward.on('click', function(e) {
+    if (zfrom < 5) zfrom += 0.01;
+    $zslider.update( { from: zfrom, })
+    drawCriticalValueLines(zfrom, zto);
+  })
+
+  $rightnudgebackward.on('click', function(e) {
+    if (zto > -5) zto -= 0.01;
+    $zslider.update( { to: zto, })
+    drawCriticalValueLines(zfrom, zto);
+  })
+
+  $rightnudgeforward.on('click', function(e) {
+    if (zto < 5) zto += 0.01;
+    $zslider.update( { to: zto, })
+    drawCriticalValueLines(zfrom, zto);
+  })
+
+  //change to the mu, sigma checkboxes
+  $mu.on('change', function() {
+    mu = parseFloat($mu.val());
+    $muslider.update({
+      from: mu
+    })
+    setTopAxis();
+  })
+
+  $sigma.on('change', function() {
+    sigma = parseFloat($sigma.val());
+    $sigmaslider.update({
+      from: sigma
+    })
+    setTopAxis();
+  })
 
   /*---------------------------------------------Tooltips on or off-------------------------------------- */
 
@@ -256,7 +441,7 @@ $(function() {
   });
 
   //helper function for testing
-  function log(s) {
+  function lg(s) {
     console.log(s);
   }  
 

@@ -1,7 +1,7 @@
 <!--
-Program       index.html 
+Program       esci-disributions.html 
 Author        Gordon Moore
-Date          15 July 2020
+Date          25 July 2020
 Description   A JavaScript implementation of esci distributions for Introduction to the New Statistics by Geoff Cumming and Robert Calin-Jageman
 Licence       GNU General Public LIcence Version 3, 29 June 2007
 -->
@@ -32,6 +32,8 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
     <title>esci-web distributions</title>
 
     <!-- stylesheets -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.3.1/css/ion.rangeSlider.min.css"/>
+
     <link rel="stylesheet" type="text/css" href="./css/tipped.css"/>
  
     <link href=./css/esci.css rel=stylesheet>
@@ -46,6 +48,8 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
     <script src=https://cdn.jsdelivr.net/npm/jstat@latest/dist/jstat.min.js ></script>
 
     <script src=https://d3js.org/d3.v5.min.js ></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.3.1/js/ion.rangeSlider.min.js"></script>
 
     <script type="text/javascript" src="./js/tipped.min.js"></script>
 
@@ -68,7 +72,16 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
         <!--------------------------------Control---------------------------->
 
         <div id=control>
+          <div id=musigmadiv>
+            <div id=mudiv><span class=greek2 >&mu;</span></div>      
+            <input id=muslider    class=musigmaslider type=text  name=my_range value=0 />
+            <input id=muval type=text>
 
+            <div id=sigmadiv><span class=greek2 >&sigma;</span></div>
+            <input id=sigmaslider class=musigmaslider type=text  name=my_range value=0 />
+            <input id=sigmaval type=text>
+
+          </div>
         </div>
 
 
@@ -84,13 +97,31 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
         <div id=topaxis></div> 
         <div id=pdfdisplay></div>
         <div id=bottomaxis></div>
-        <div id=sliderdisplay></div>
+
+        <!----------------------------------------Slider---------------------------------------------------->
+        <div id=sliderdisplayarea>
+          <img id=leftnudgebackward class="icons slidericons" src=./images/left.png alt='nudge backwards'><img id=leftnudgeforward class="icons slidericons" src=./images/right.png alt='nudge forward'>
+          <!-- <div id=sliderdisplay> -->
+            <div id=zsliderdiv ><input id=zslider type=text class=js-range-slider name=my_range value=0 /></div>
+          <!-- </div> -->
+          <img id=rightnudgebackward class="icons slidericons" src=./images/left.png alt='nudge backwards'><img id=rightnudgeforward class="icons slidericons" src=./images/right.png alt='nudge forward'>
+        </div>
+
       </div>
 
     </div>
 
-    <script id="__bs_script__">//<![CDATA[
+
+
+
+    <!-- <script id="__bs_script__">//<![CDATA[
       document.write("<script async src='http://HOST:3000/browser-sync/browser-sync-client.js?v=2.26.3'><\/script>".replace("HOST", location.hostname));
     //]]></script>
-  </body>
+  </body> -->
 </html>
+
+
+<!--Attribution on icons
+previous by Christian Antonius from the Noun Project
+
+-->
