@@ -21,38 +21,142 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 
 /*----------------------------------control side  (set in esci.css)--------------------------------*/
 
+/*----------------------------------left panel-----------------------------------------------------*/
+
+#leftpanel {
+
+}
+
+/*----------------tab-----------------*/
+#smarttab {
+  margin-top: 2px;
+  margin-left: 2px;
+  margin-right: 2px;
+}
+
+/*----------------Normal tab------------*/
+
+#tab-1 {
+  font-size: 1.8rem !important;
+}
+
+label {
+ font-size: 1.8rem !important;
+}
+/*----------------Panel 1 Tails----------*/
+
+#tailspanel {
+  background-color: #FFCC99;
+  border: 1px solid black;
+}
+
+#tails {
+  margin: 1rem;
+}
+
+#showarea {
+  margin-left: 5rem;
+}
+
+.red {
+  color: red;
+}
+
+
 .greek2 {
   font-size: 2.5rem;
 }
 
+/*----------------------Panel 2 Lines-------------------*/
+
+
+#muzline {
+  margin: 1rem;
+}
+
+#lines {
+  background-color: #CCFFFF;
+  border: 1px solid black;
+}
+
+#showzline {
+  margin-left: 5rem;
+}
+
+/*----------------------Panel 3 Mu Sigma-----------------*/
+
+#Xselectdiv {
+  display: grid;
+  grid-template-columns: 18rem auto;
+}
+
+#showxaxisdiv {
+  margin: 1rem;
+}
+
+#unitsdiv {
+  padding-top: 1.0rem;
+}
+
+#units {
+  width: 12rem;
+}
+
+input[type=text] {
+  height: 2.5rem;
+}
+
+
+#musigma {
+  background-color: #FFFF99;
+  border: 1px solid black;
+  height: 30rem;
+}
 
 #musigmadiv {
   display: grid;
-  grid-template-columns: 5rem 25rem 5rem;
+  grid-template-columns: 2.5rem 25rem 2rem 1rem 5rem;
   grid-row-gap: 3rem;
   margin-top: 2rem;
 }
 
+.iconsmusigma {
+  padding-top: 0.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.iconsmusigma:hover {
+  background-color: lightgrey;
+}
+
+.iconsmusigma:active {
+  background-color: darkgrey;
+}
+
+
 #mudiv {
 padding-top: 2rem; 
-margin-left: 1rem;
+margin-left: 0.5rem;
 }
 
 #sigmadiv {
   padding-top: 2rem; 
-  margin-left: 1rem;
+  margin-left: 0.5rem;
 }
 
 #muval {
-  margin-top: 3rem;
+  margin-top: 2.8rem;
   margin-left: 2rem;
 }
 
 #sigmaval {
-  margin-top: 3rem;
+  margin-top: 2.8rem;
   margin-left: 2rem;
 }
 
+
+/*---------------Student t tab---------------*/
 
 
 /*----------------------------------display---------------------------------------------------------*/

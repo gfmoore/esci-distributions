@@ -27,9 +27,14 @@ $(function() {
 
   let realHeight = 100;                                     //the real world height for the pdf display area
   let margin = {top: 0, right: 10, bottom: 0, left: 70};    //margins for pdf display area
+
+
   let width;
   let height;                                               //the true width of the pdf display area in pixels
-  let heightP;                                               //the true width of the pdf display area in pixels
+  let heightP;   
+  
+  let rwidth;                                               //the width returned by resize
+  let rheight;                                              //the height returned by resize
 
   let xt, xb, y;                                            //scale functions
 
@@ -54,17 +59,43 @@ $(function() {
   $mu    = $('#muval');
   $sigma = $('#sigmaval');
 
+  const $showarea  = $('#showarea');
+  let showarea     = false;
+  const $notails   = $('#notails');
+  let notails      = true;
+  const $onetail   = $('#onetail');
+  let onetail      = false;
+  const $twotails  = $('#twotails');
+  let twotails     = false;
+
+  const $showmuline = $('#showmuline');
+  let showmuline    = false;
+  const $showzline  = $('#showzline');
+  let showzline     = false;
+
+
+  const $showxaxis  = $('#showxaxis');
+  let showxaxis     = false;
+
+  const $units      = $('#units');
+  let units         = $units.val('IQ Points');
+
   const $leftnudgebackward  = $('#leftnudgebackward')
   const $leftnudgeforward  =  $('#leftnudgeforward');
   const $rightnudgebackward = $('#rightnudgebackward')
   const $rightnudgeforward =  $('#rightnudgeforward');
 
+  const $munudgebackward    = $('#munudgebackward'); 
+  const $munudgeforward     = $('#munudgeforward'); 
+  const $sigmanudgebackward = $('#sigmanudgebackward'); 
+  const $sigmanudgeforward  = $('#sigmanudgeforward'); 
+
   //api for getting width, height of element - only gets element, not entire DOM
   // https://www.digitalocean.com/community/tutorials/js-resize-observer
   const resizeObserver = new ResizeObserver(entries => {
     entries.forEach(entry => {
-      width = entry.contentRect.width;
-      height = entry.contentRect.height;
+      rwidth = entry.contentRect.width;
+      rHeight = entry.contentRect.height;
     });
   });
 
@@ -73,7 +104,32 @@ $(function() {
   initialise();
 
   function initialise() {
-
+    //tabs
+    $('#smarttab').smartTab({
+      selected: 0, // Initial selected tab, 0 = first tab
+      theme: 'round', // theme for the tab, related css need to include for other than default theme
+      orientation: 'horizontal', // Nav menu orientation. horizontal/vertical
+      justified: true, // Nav menu justification. true/false
+      autoAdjustHeight: true, // Automatically adjust content height
+      backButtonSupport: true, // Enable the back button support
+      enableURLhash: true, // Enable selection of the tab based on url hash
+      transition: {
+          animation: 'slide-horizontal', // Effect on navigation, none/fade/slide-horizontal/slide-vertical/slide-swing
+          speed: '400', // Transion animation speed
+          easing:'' // Transition animation easing. Not supported without a jQuery easing plugin
+      },
+      autoProgress: { // Auto navigate tabs on interval
+          enabled: false, // Enable/Disable Auto navigation
+          interval: 3500, // Auto navigate Interval (used only if "autoProgress" is set to true)
+          stopOnFocus: true, // Stop auto navigation on focus and resume on outfocus
+      },
+      keyboardSettings: {
+          keyNavigation: true, // Enable/Disable keyboard navigation(left and right keys are used if enabled)
+          keyLeft: [37], // Left key code
+          keyRight: [39] // Right key code
+      }
+    });
+    
     //initialvalues - pick these up from textboxes/sliders or dropdowns
     mu     = 100;
     sigma  = 15;
@@ -87,8 +143,8 @@ $(function() {
     setTooltips();
 
     //get initial values for height/width
-    width  = $('#pdfdisplay').outerWidth(true);
-    height = $('#pdfdisplay').outerHeight(true);
+    rwidth  = $('#pdfdisplay').outerWidth(true);
+    rheight = $('#pdfdisplay').outerHeight(true);
 
     //these are fixed so do I need to be responsive?
     heighttopaxis    = $('#topaxis').outerHeight(true);
@@ -146,7 +202,7 @@ $(function() {
       }
     })
 
-    $('.js-range-slider').ionRangeSlider({
+    $('#zslider').ionRangeSlider({
       skin: 'big',
       type: 'double',
       min: -5,
@@ -168,7 +224,7 @@ $(function() {
     //get reference to sliders
     $muslider    = $("#muslider").data("ionRangeSlider");
     $sigmaslider = $("#sigmaslider").data("ionRangeSlider");
-    $zslider     = $(".js-range-slider").data("ionRangeSlider");
+    $zslider     = $("#zslider").data("ionRangeSlider");
 
     $mu.val(mu);
     $sigma.val(sigma);
@@ -223,10 +279,8 @@ $(function() {
 
     resizeObserver.observe(pdfdisplay);  //note doesn't get true outer width, height
 
-    width   = width - margin.left - margin.right;  
-    heightP = height - margin.top - margin.bottom;
-
-
+    width   = rwidth - margin.left - margin.right;  
+    heightP = rheight - margin.top - margin.bottom;
 
     clear();
   }
@@ -258,6 +312,8 @@ $(function() {
   function setTopAxis() {
     //clear axes
     d3.selectAll('.topaxis').remove();
+
+    width   = rwidth - margin.left - margin.right;  
     
     let left  = mu-5*sigma
     let right = mu+5*sigma
@@ -338,8 +394,37 @@ $(function() {
     })
   }
 
+  /*-------------------------------------tails control---------------------------------------*/
 
-  //for some very weird reason the event was triggering three times!!!  https://stackoverflow.com/questions/14969960/jquery-click-events-firing-multiple-times 
+  $showarea.on('change', function() {
+    showarea = $showarea.prop('checked');
+  })
+
+  $("input[name='tails']").change(function() {
+    notails  = $notails.prop('checked');
+    onetail  = $onetail.prop('checked');
+    twotails = $twotails.prop('checked');    
+  })
+
+  /*---------------------------------------lines-----------------------------------------------*/
+
+  $showmuline.on('change', function() {
+    showmuline = $showmuline.prop('checked');
+
+  })
+
+  $showzline.on('change', function() {
+    showzline = $showzline.prop('checked');
+  })
+
+
+  /*----------------------------------------------pdf slider-------------------------------------*/
+
+  $showxaxis.on('change', function() {
+    showxaxis = $showxaxis.prop('checked');
+
+  })
+
   $leftnudgebackward.on('click', function(e) {
     if (zfrom > -5) zfrom -= 0.01;
     $zslider.update( { from: zfrom, })
@@ -364,22 +449,56 @@ $(function() {
     drawCriticalValueLines(zfrom, zto);
   })
 
+
+  /*-----------------------------------------mu sigma --------------------------------------*/
   //change to the mu, sigma checkboxes
   $mu.on('change', function() {
     mu = parseFloat($mu.val());
+    updateMu();
+  })
+
+  $munudgebackward.on('click', function() {
+    mu -= 1;
+    $mu.val(mu);
+    updateMu();
+  })
+
+  $munudgeforward.on('click', function() {
+    mu += 1;
+    $mu.val(mu);
+    updateMu();
+  })
+
+  function updateMu() {
     $muslider.update({
       from: mu
     })
-    setTopAxis();
-  })
+    setTopAxis();   
+  }
 
   $sigma.on('change', function() {
     sigma = parseFloat($sigma.val());
+    updateSigma();
+  })
+
+  $sigmanudgebackward.on('click', function() {
+    if (sigma > 1) sigma -= 1;
+    $sigma.val(sigma);
+    updateSigma();
+  })
+
+  $sigmanudgeforward.on('click', function() {
+    sigma += 1;
+    $sigma.val(sigma);
+    updateSigma();
+  })
+
+  function updateSigma() {
     $sigmaslider.update({
       from: sigma
     })
-    setTopAxis();
-  })
+    setTopAxis();   
+  }
 
   /*---------------------------------------------Tooltips on or off-------------------------------------- */
 

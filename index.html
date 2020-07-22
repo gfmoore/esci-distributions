@@ -34,7 +34,10 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
     <!-- stylesheets -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.3.1/css/ion.rangeSlider.min.css"/>
 
-    <link rel="stylesheet" type="text/css" href="./css/tipped.css"/>
+    <!-- <link href="https://cdn.jsdelivr.net/npm/jquery-smarttab@3/dist/css/smart_tab_all.min.css" rel="stylesheet" type="text/css" /> -->
+    <link href=./css/smart_tab_esci.css rel=stylesheet> 
+
+    <link href=./css/tipped.css rel=stylesheet type=text/css />
  
     <link href=./css/esci.css rel=stylesheet>
     <link href=./css/esci-distributions.css rel=stylesheet>
@@ -51,7 +54,12 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ion-rangeslider/2.3.1/js/ion.rangeSlider.min.js"></script>
 
-    <script type="text/javascript" src="./js/tipped.min.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/jquery-smarttab@3/dist/js/jquery.smartTab.min.js" type="text/javascript"></script> -->
+
+    <script src=./js/jquery.smartTab.js></script>
+
+    <script src=./js/tipped.min.js></script>
+
 
     <script src=./js/esci-distributions.js defer></script>
 
@@ -69,26 +77,93 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
           <div id=tooltipsonoff>?</div>
         </div>
 
-        <!--------------------------------Control---------------------------->
+        <!---------------------------------Set up tabs------------------------------------------------->
+        <div id="smarttab">
 
-        <div id=control>
-          <div id=musigmadiv>
-            <div id=mudiv><span class=greek2 >&mu;</span></div>      
-            <input id=muslider    class=musigmaslider type=text  name=my_range value=0 />
-            <input id=muval type=text>
+          <ul class="nav">
+            <li>
+              <a class="nav-link" href="#tab-1">Normal Distribution</a>
+            </li>
+            <li>
+              <a class="nav-link" href="#tab-2">Student t Distribution</a>
+            </li>
+          </ul>
+       
+          <div class="tab-content">
 
-            <div id=sigmadiv><span class=greek2 >&sigma;</span></div>
-            <input id=sigmaslider class=musigmaslider type=text  name=my_range value=0 />
-            <input id=sigmaval type=text>
+            <div id="tab-1" class="tab-pane" role="tabpanel">
+              <!-- Normal Distribution -->
+              <div id=normalpanel>
+
+                <div id=tailspanel>
+                  <span><span class=red>1 </span>Tails </span>
+
+                  <div id=tails>
+                    <div><input type=radio id=notails  name=tails value=notails checked><label id=labelfornotails  for=notails  data-tooltip>No tails</label></div>
+                    <div>
+                      <input type=radio    id=onetail  name=tails value=onetail><label id=labelforonetail  for=onetail  data-tooltip>One tail</label>
+                      <input type=checkbox id=showarea name=showarea value=showarea><label id=labelforareas for=showareas data-tooltip>Areas</label>
+                    </div>
+                    <div><input type=radio id=twotails name=tails value=twotails><label id=labelfortwotails for=twotails data-tooltip>Two tails</label></div>
+                  </div>
+                </div>
+
+                <div id=lines>
+                  <span></span><span class=red>2 </span>Lines </span>
+                  <div id=muzline>
+                    <input type=checkbox id=showmuline><label id=labelformuline for=showmuline data-tooltip>mean line</label>
+                    <input type=checkbox id=showzline> <label id=labelforzline  for=showzline  data-tooltip>z lines</label>
+                  </div>  
+                  <div>
+
+                  </div>
+
+                </div>
+
+                <div id=musigma>
+                  <span></span><span class=red>3 </span>X variable </span>
+
+                  <div id=Xselectdiv>
+                    <div id=showxaxisdiv><input type=checkbox id=showxaxis><label id=labelforxaxis for=showxaxis data-tooltip>Display X axis</label></div>
+                    <div id=unitsdiv><span>Units: </span><input id=units type=text></div>
+                  </div>
+
+                  <div id=musigmadiv>
+                    <div id=mudiv><span class=greek2 >&mu;</span></div>    
+                    <input id=muslider    class=musigmaslider type=text value=0 />
+                    <img id=munudgebackward class="iconsmusigma slidericons" src=./images/left.png alt='nud backwards'>
+                    <img id=munudgeforward class="iconsmusigma slidericons" src=./images/right.png alt='nudge forward'> 
+                    <input id=muval type=text>
+        
+                    <div id=sigmadiv><span class=greek2 >&sigma;</span></div>
+                    <input id=sigmaslider class=musigmaslider type=text value=0 />
+                    <img id=sigmanudgebackward class="iconsmusigma slidericons" src=./images/left.png alt='nudge backwards'>
+                    <img id=sigmanudgeforward class="iconsmusigma slidericons" src=./images/right.png alt='nudge forward'>  
+                    <input id=sigmaval type=text>
+        
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+            <div id="tab-2" class="tab-pane" role="tabpane1">
+              <!-- Student t Distribution -->
+              <div id=studenttpanel>
+                hello
+              </div>
+            </div>
 
           </div>
-        </div>
 
+        </div>
+      
 
         <!---------------------------------Footer---------------------------------------------->
         <div id=footer>
           <div id=footerlink data-tooltip>Please click here to return to the New Statistics website.</div>
         </div>
+
       </div>
 
       <!-------------------------------------Right panel---------------------------------------------->
@@ -101,9 +176,7 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
         <!----------------------------------------Slider---------------------------------------------------->
         <div id=sliderdisplayarea>
           <img id=leftnudgebackward class="icons slidericons" src=./images/left.png alt='nudge backwards'><img id=leftnudgeforward class="icons slidericons" src=./images/right.png alt='nudge forward'>
-          <!-- <div id=sliderdisplay> -->
-            <div id=zsliderdiv ><input id=zslider type=text class=js-range-slider name=my_range value=0 /></div>
-          <!-- </div> -->
+          <div id=zsliderdiv ><input id=zslider type=text value=0 /></div>
           <img id=rightnudgebackward class="icons slidericons" src=./images/left.png alt='nudge backwards'><img id=rightnudgeforward class="icons slidericons" src=./images/right.png alt='nudge forward'>
         </div>
 
@@ -111,17 +184,5 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 
     </div>
 
-
-
-
-    <!-- <script id="__bs_script__">//<![CDATA[
-      document.write("<script async src='http://HOST:3000/browser-sync/browser-sync-client.js?v=2.26.3'><\/script>".replace("HOST", location.hostname));
-    //]]></script>
-  </body> -->
+  </body>
 </html>
-
-
-<!--Attribution on icons
-previous by Christian Antonius from the Noun Project
-
--->
