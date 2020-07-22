@@ -163,13 +163,38 @@ margin-left: 0.5rem;
 #rightpanel {
   border: 1px solid grey;
   display: grid;
-  grid-template-rows: 5rem 50% 5rem auto;
+  grid-template-rows: 8rem 50% 5rem auto;
 }
 
 /*---------------------------------top axis---------------------------------------------------------*/
 
 #topaxis {
   background-color: white;
+  font-size: 1.0rem;
+}
+
+.topaxistext {
+  font-size: 2.0rem;
+  font-weight: bold;
+  font-style: italic;
+}
+
+.topaxisunits {
+  font-size: 1.8rem;
+  /* font-weight: bold; */
+}
+
+/*---------------------------------bottom axis---------------------------------------------------------*/
+
+#bottomaxis {
+  background-color: white;
+  font-size: 1.0rem;
+}
+
+.bottomaxistext {
+  font-size: 2.0rem;
+  font-weight: bold;
+  font-style: italic;
 }
 
 /*----------------------------------pdf-------------------------------------------------------------*/
@@ -179,7 +204,7 @@ margin-left: 0.5rem;
   background-color: white;
 }
 
-/*---------------------------------top axis---------------------------------------------------------*/
+/*---------------------------------bottom axis---------------------------------------------------------*/
 
 #bottomaxis {
   background-color: white;

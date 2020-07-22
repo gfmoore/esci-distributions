@@ -18,6 +18,7 @@ let version = '0.0.1';
 $(function() {
   console.log('jQuery here!');  //just to make sure everything is working
 
+  let tab = 'Normal';                                       //what tab?
 
   //#region for variable definitions (just allows code folding)
   let tooltipson = false;                                   //toggle the tooltips on or off
@@ -44,7 +45,9 @@ $(function() {
 
 
   let mu, sigma, df;                                        //the population mean, standard deviation and degrees of freedom
-  let zmu, zsd;                                             //parametrs of normal distribution
+  let zmu, zsd;                                             //parameters of normal distribution
+
+  let z;
 
   let normalpdf = [];                                       //the array holding the normal distribution
   let tpdf = [];                                            //the array holding the student t distribution
@@ -78,7 +81,8 @@ $(function() {
   let showxaxis     = false;
 
   const $units      = $('#units');
-  let units         = $units.val('IQ Points');
+  let units         = 'IQ Points';
+  $units.val(units);
 
   const $leftnudgebackward  = $('#leftnudgebackward')
   const $leftnudgeforward  =  $('#leftnudgeforward');
@@ -102,6 +106,29 @@ $(function() {
   //#endregion
 
   initialise();
+
+  //change tabs
+  $("#smarttab").on("showTab", function(e, anchorObject, tabIndex) {
+    if (tabIndex === 0) tab = 'Normal';
+    if (tabIndex === 1) tab = 'Studentt';
+
+    if (tab === 'Normal') {   
+      removeCriticalTails();
+      removetPDF();
+
+      setupDisplay();
+
+      drawNormalPDF();
+    }
+    if (tab === 'Studentt') {   //Student t
+      removeCriticalTails();
+      removeNormalPDF();
+
+      setupDisplay();
+
+      drawtPDF();
+    }
+  });
 
   function initialise() {
     //tabs
@@ -282,10 +309,10 @@ $(function() {
     width   = rwidth - margin.left - margin.right;  
     heightP = rheight - margin.top - margin.bottom;
 
-    clear();
+    clearNormal();
   }
 
-  function clear() {
+  function clearNormal() {
     setupDisplay();
 
     createNormal();
@@ -300,41 +327,53 @@ $(function() {
   }
 
   function setupDisplay() {
-
     //the height is 0 - 100 in real world coords
     y = d3.scaleLinear().domain([0, realHeight]).range([heightP, 0]);
 
     setTopAxis();
     setBottomAxis();
-
   }
   
   function setTopAxis() {
     //clear axes
     d3.selectAll('.topaxis').remove();
+    d3.selectAll('.topaxistext').remove();
+    d3.selectAll('.topaxisunits').remove();
 
-    width   = rwidth - margin.left - margin.right;  
-    
-    let left  = mu-5*sigma
-    let right = mu+5*sigma
+    if (showxaxis) {
+      width   = rwidth - margin.left - margin.right;  
+      
+      let left  = mu-5*sigma
+      let right = mu+5*sigma
 
-    xt = d3.scaleLinear().domain([left, right]).range([margin.left, width]);
+      xt = d3.scaleLinear().domain([left, right]).range([margin.left, width]);
 
-    //top horizontal axis
-    let xAxisA = d3.axisTop(xt);
-    svgTopAxis.append('g').attr('class', 'topaxis').attr( 'transform', 'translate(0, 40)' ).call(xAxisA);
-    
+      //top horizontal axis
+      let xAxisA = d3.axisTop(xt);
+      svgTopAxis.append('g').attr('class', 'topaxis').attr( 'transform', 'translate(0, 40)' ).call(xAxisA);
+
+      //add some text labels
+      svgTopAxis.append('text').text('X').attr('class', 'topaxistext').attr('x', width/2 - 20).attr('y', 20).attr('text-anchor', 'start').attr('fill', 'black');
+      svgTopAxis.append('text').text(units).attr('class', 'topaxisunits').attr('x', width/2 - 70).attr('y', 70).attr('text-anchor', 'start').attr('fill', 'black');
+    }
   }
 
   function setBottomAxis() {
+    
     //the width is either -5 to +5 or 25 to 175 etc in real world coords
     //clear axes
     d3.selectAll('.bottomaxis').remove();
+    d3.selectAll('.bottomaxistext').remove();
+
     xb = d3.scaleLinear().domain([-5, 5]).range([margin.left, width]);
 
     //bottom horizontal axis
     let xAxisB = d3.axisBottom(xb);
     svgBottomAxis.append('g').attr('class', 'bottomaxis').attr( 'transform', 'translate(0, 0)' ).call(xAxisB);
+
+    //add some text labels
+    if (tab === 'Normal')   svgBottomAxis.append('text').text('z').attr('class', 'bottomaxistext').attr('x', width/2 + 100).attr('y', 40).attr('text-anchor', 'start').attr('fill', 'black');
+    if (tab === 'Studentt') svgBottomAxis.append('text').text('t').attr('class', 'bottomaxistext').attr('x', width/2 + 100).attr('y', 40).attr('text-anchor', 'start').attr('fill', 'black');
 
   }
 
@@ -394,6 +433,14 @@ $(function() {
     })
   }
 
+  function drawtPDF() {
+
+  }
+
+  function removetPDF() {
+
+  }
+
   /*-------------------------------------tails control---------------------------------------*/
 
   $showarea.on('change', function() {
@@ -410,11 +457,34 @@ $(function() {
 
   $showmuline.on('change', function() {
     showmuline = $showmuline.prop('checked');
-
+    if (showmuline) {
+      svgP.append('line').attr('class', 'muline').attr('x1', xb(0)+1).attr('y1', y(0)).attr('x2', xb(0)+1).attr('y2', y(realHeight)).attr('stroke', 'black').attr('stroke-width', 2);
+    }
+    else {
+      d3.selectAll('.muline').remove();
+    }
   })
 
   $showzline.on('change', function() {
     showzline = $showzline.prop('checked');
+    if (showzline) {
+      let z = 0;
+      let s = 1;
+      svgP.append('line').attr('class', 'zlines').attr('x1', xb(z - 5*s)).attr('y1', y(0)).attr('x2', xb(z - 5*s)).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 2);
+      svgP.append('line').attr('class', 'zlines').attr('x1', xb(z - 4*s)).attr('y1', y(0)).attr('x2', xb(z - 4*s)).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 2);
+      svgP.append('line').attr('class', 'zlines').attr('x1', xb(z - 3*s)).attr('y1', y(0)).attr('x2', xb(z - 3*s)).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 2);
+      svgP.append('line').attr('class', 'zlines').attr('x1', xb(z - 2*s)).attr('y1', y(0)).attr('x2', xb(z - 2*s)).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 2);
+      svgP.append('line').attr('class', 'zlines').attr('x1', xb(z - 1*s)).attr('y1', y(0)).attr('x2', xb(z - 1*s)).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 2);
+      svgP.append('line').attr('class', 'muline').attr('x1', xb(z)+1).attr('y1', y(0)).attr('x2', xb(z)+1).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 2);
+      svgP.append('line').attr('class', 'zlines').attr('x1', xb(z + 1*s)).attr('y1', y(0)).attr('x2', xb(z + 1*s)).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 2);
+      svgP.append('line').attr('class', 'zlines').attr('x1', xb(z + 2*s)).attr('y1', y(0)).attr('x2', xb(z + 2*s)).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 2);
+      svgP.append('line').attr('class', 'zlines').attr('x1', xb(z + 3*s)).attr('y1', y(0)).attr('x2', xb(z + 3*s)).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 2);
+      svgP.append('line').attr('class', 'zlines').attr('x1', xb(z + 4*s)).attr('y1', y(0)).attr('x2', xb(z + 4*s)).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 2);
+      svgP.append('line').attr('class', 'zlines').attr('x1', xb(z + 5*s)).attr('y1', y(0)).attr('x2', xb(z + 5*s)).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 2);
+    }
+    else {
+      d3.selectAll('.zlines').remove();
+    }
   })
 
 
@@ -422,7 +492,12 @@ $(function() {
 
   $showxaxis.on('change', function() {
     showxaxis = $showxaxis.prop('checked');
+    setTopAxis(); //turns it on or off
+  })
 
+  $units.on('change', function() {
+    units = $units.val();
+    setTopAxis();
   })
 
   $leftnudgebackward.on('click', function(e) {
