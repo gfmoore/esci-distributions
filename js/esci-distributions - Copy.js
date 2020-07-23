@@ -244,27 +244,12 @@ $(function() {
         //want to refer to these values elsewhere. Have to do two tails at end otherwise hangs
         zfrom = data.from;
         zto   = data.to;
-        drawCriticalValueLines();
+        if (!twotails) drawCriticalValueLines(zfrom, zto);
       },
       onFinish: function (data) {
-        if (twotails) {  //make both tails the same
-          zfrom = data.from;
-          zto   = data.to;
-          if (zfrom !== oldzfrom) {  //from slider changed
-            zto = -zfrom;
-            oldzfrom = zfrom;
-            oldzto = zto;
-            setSliders();
-          }
-          else if (zto !== oldzto) {  //to slider changed 
-            zfrom = -zto;
-            oldzfrom = zfrom;
-            oldzto = zto;
-            setSliders();
-          } 
-          drawCriticalValueLines();
-        }
-
+        zfrom = data.from;
+        zto   = data.to;
+        if (twotails) drawCriticalValueLines(zfrom, zto);
       }
     })
 
@@ -308,7 +293,7 @@ $(function() {
     //resetCriticalTails();
     removeNormalPDF();
     drawNormalPDF();
-    drawCriticalValueLines()
+    drawCriticalValueLines(zfrom, zto)
 
   }
 
@@ -332,7 +317,7 @@ $(function() {
       let left  = mu-5*sigma
       let right = mu+5*sigma
 
-      xt = d3.scaleLinear().domain([left, right]).range([margin.left-1, width+2]);
+      xt = d3.scaleLinear().domain([left, right]).range([margin.left, width]);
 
       //top horizontal axis
       let xAxisA = d3.axisTop(xt);
@@ -351,7 +336,7 @@ $(function() {
     d3.selectAll('.bottomaxis').remove();
     d3.selectAll('.bottomaxistext').remove();
 
-    xb = d3.scaleLinear().domain([-5.0, 5.0]).range([margin.left-1, width+2]);
+    xb = d3.scaleLinear().domain([-5, 5]).range([margin.left, width]);
 
     //bottom horizontal axis
     let xAxisB = d3.axisBottom(xb);
@@ -431,65 +416,74 @@ $(function() {
 
   $showarea.on('change', function() {
     showarea = $showarea.prop('checked');
-    drawCriticalValueLines();
   })
 
   $("input[name='tails']").change(function() {
     notails  = $notails.prop('checked');
     onetail  = $onetail.prop('checked');
-    twotails = $twotails.prop('checked'); 
-    if (twotails) {
-      zfrom = -zto; //had to choose one side
-      zoldfrom = zfrom
-      zoldto = zto;
-      $zslider.update( { from: zfrom, to: zto })
-    }
-    drawCriticalValueLines();   
+    twotails = $twotails.prop('checked');    
   })
 
-  function drawCriticalValueLines() {
+  function drawCriticalValueLines(from, to) {
     removeCriticalTails()
 
     if (!notails) {
 
-      if (onetail || twotails) {
-        dfrom = scaleypdf(jStat.normal.pdf(zfrom, zmu, zsd));
-        dto =   scaleypdf(jStat.normal.pdf(zto, zmu, zsd));
+      if (onetail) {
+        dfrom = scaleypdf(jStat.normal.pdf(from, zmu, zsd));
+        dto =   scaleypdf(jStat.normal.pdf(to, zmu, zsd));
 
-        svgP.append('line').attr('class', 'criticalvalueline').attr('x1', xb(zfrom)).attr('y1', y(0)).attr('x2', xb(zfrom)).attr('y2', y(dfrom)).attr('stroke', 'black').attr('stroke-width', 2);
-        svgP.append('line').attr('class', 'criticalvalueline').attr('x1', xb(zto)).attr('y1', y(0)).attr('x2', xb(zto)).attr('y2', y(dto)).attr('stroke', 'black').attr('stroke-width', 2);
+        svgP.append('line').attr('class', 'criticalvalueline').attr('x1', xb(from)).attr('y1', y(0)).attr('x2', xb(from)).attr('y2', y(dfrom)).attr('stroke', 'black').attr('stroke-width', 2);
+        svgP.append('line').attr('class', 'criticalvalueline').attr('x1', xb(to)).attr('y1', y(0)).attr('x2', xb(to)).attr('y2', y(dto)).attr('stroke', 'black').attr('stroke-width', 2);
 
         arealefttail = d3.area()
           .x(function(d) { return xb(d.x) })
           .y1(y(0))
-          .y0(function(d) { if (d.x < zfrom) return y(d.y); else return y(0); });
+          .y0(function(d) { if (d.x < from) return y(d.y); else return y(0); });
 
         svgP.append('path').attr('class', 'criticalregionlefttail').attr('d', arealefttail(normalpdf));
 
         arearighttail = d3.area()
           .x(function(d) { return xb(d.x) })
           .y1(y(0))
-          .y0(function(d) { if (d.x > zto) return y(d.y); else return y(0); });      
+          .y0(function(d) { if (d.x > to) return y(d.y); else return y(0); });      
 
         svgP.append('path').attr('class', 'criticalregionrighttail').attr('d', arearighttail(normalpdf));
+      }
 
-        if (showarea) {
-          let pfromlt = jStat.normal.cdf(zfrom, zmu, zsd); //prob from slider less than
-          let pfromgt = 1 - pfromlt;                       //prob from slider less than   
-          let ptolt   = jStat.normal.cdf(zto, zmu, zsd);   //prob to slider less than
-          let ptogt   = 1 - ptolt;                         //prob to slider greater than
-
-          pfromlt = pfromlt.toFixed(4);
-          pfromgt = pfromgt.toFixed(4);
-          ptolt   = ptolt.toFixed(4);
-          ptogt   = ptogt.toFixed(4);
-
-          svgP.append('text').text(pfromlt).attr('class', 'probability').attr('x', width/2 - 220).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
-          svgP.append('text').text(pfromgt).attr('class', 'probability').attr('x', width/2 - 150).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
-          svgP.append('text').text(ptolt).attr('class',   'probability').attr('x', width/2 + 150).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
-          svgP.append('text').text(ptogt).attr('class',   'probability').attr('x', width/2 + 220).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+      if (twotails) {
+        if (zfrom !== oldzfrom) {  //from slider changed
+          zto = -zfrom;
+          oldzfrom = zfrom;
+          setSliders();
+        }
+        else if (zto !== oldzto) {      //to slider changed 
+          zfrom = -zto;
+          oldzto = zto;
+          setSliders();
         }
 
+
+        dfrom = scaleypdf(jStat.normal.pdf(from, zmu, zsd));
+        dto =   scaleypdf(jStat.normal.pdf(to, zmu, zsd));
+  
+        svgP.append('line').attr('class', 'criticalvalueline').attr('x1', xb(from)).attr('y1', y(0)).attr('x2', xb(from)).attr('y2', y(dfrom)).attr('stroke', 'black').attr('stroke-width', 2);
+        svgP.append('line').attr('class', 'criticalvalueline').attr('x1', xb(to)).attr('y1', y(0)).attr('x2', xb(to)).attr('y2', y(dto)).attr('stroke', 'black').attr('stroke-width', 2);
+  
+        arealefttail = d3.area()
+          .x(function(d) { return xb(d.x) })
+          .y1(y(0))
+          .y0(function(d) { if (d.x < from) return y(d.y); else return y(0); });
+  
+        svgP.append('path').attr('class', 'criticalregionlefttail').attr('d', arealefttail(normalpdf));
+  
+        arearighttail = d3.area()
+          .x(function(d) { return xb(d.x) })
+          .y1(y(0))
+          .y0(function(d) { if (d.x > to) return y(d.y); else return y(0); });      
+  
+        svgP.append('path').attr('class', 'criticalregionrighttail').attr('d', arearighttail(normalpdf));
+  
       }
     }
 
@@ -500,7 +494,6 @@ $(function() {
     svgP.selectAll('.criticalvalueline').remove();
     svgP.selectAll('.criticalregionlefttail').remove();
     svgP.selectAll('.criticalregionrighttail').remove();
-    svgP.selectAll('.probability').remove();
   }
 
   function setSliders() {
@@ -594,34 +587,29 @@ $(function() {
 
   $leftnudgebackward.on('click', function(e) {
     if (zfrom > -5) zfrom -= 0.01;
-    if (twotails) zto = -zfrom;
-    zsliderUpdate();
+    $zslider.update( { from: zfrom, })
+    drawCriticalValueLines(zfrom, zto);
   })
 
   $leftnudgeforward.on('click', function(e) {
     if (zfrom < 5) zfrom += 0.01;
-    if (twotails) zto = -zfrom;
-    zsliderUpdate();
+    $zslider.update( { from: zfrom, })
+    drawCriticalValueLines(zfrom, zto);
   })
 
   $rightnudgebackward.on('click', function(e) {
     if (zto > -5) zto -= 0.01;
-    if (twotails) zfrom = -zto;
-    zsliderUpdate();
+    $zslider.update( { to: zto, })
+    drawCriticalValueLines(zfrom, zto);
   })
 
   $rightnudgeforward.on('click', function(e) {
     if (zto < 5) zto += 0.01;
-    if (twotails) zfrom = -zto;
-    zsliderUpdate();
+    $zslider.update( { to: zto, })
+    drawCriticalValueLines(zfrom, zto);
   })
 
-  function zsliderUpdate() {
-    zoldfrom = zfrom;
-    zoldto = zto;
-    $zslider.update( { from: zfrom, to: zto })
-    drawCriticalValueLines();
-  }
+
   /*-----------------------------------------mu sigma --------------------------------------*/
   //change to the mu, sigma checkboxes
   $mu.on('change', function() {
