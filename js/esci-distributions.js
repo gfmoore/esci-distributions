@@ -43,11 +43,10 @@ $(function() {
   let svgBottomAxis;                                        //svg reference to the bottom axis
   let svgP;                                                 //the svg reference to pdfdisplay
 
-
-  let mu, sigma, df;                                        //the population mean, standard deviation and degrees of freedom
+  let mu, sigma;                                            //the population mean, standard deviation and degrees of freedom
   let zmu, zsd;                                             //parameters of normal distribution
 
-  let z;
+  let df;                                                   //degrees of freedom
 
   let normalpdf = [];                                       //the array holding the normal distribution
   let tpdf = [];                                            //the array holding the student t distribution
@@ -58,9 +57,12 @@ $(function() {
   let $zslider;                                              //reference to slider
   let zfrom, zto;                                            //the current from to values on the slider
   let oldzfrom, oldzto;                                      //remember old (previous) values to determine whcih slider changed
+
   //cache jquery properties (faster)
   $mu    = $('#muval');
   $sigma = $('#sigmaval');
+
+  $df    = $('#dfval');
 
   const $showarea  = $('#showarea');
   let showarea     = false;
@@ -76,7 +78,6 @@ $(function() {
   const $showzline  = $('#showzline');
   let showzline     = false;
 
-
   const $showxaxis  = $('#showxaxis');
   let showxaxis     = false;
 
@@ -84,6 +85,7 @@ $(function() {
   let units         = 'IQ Points';
   $units.val(units);
 
+ 
   const $leftnudgebackward  = $('#leftnudgebackward')
   const $leftnudgeforward  =  $('#leftnudgeforward');
   const $rightnudgebackward = $('#rightnudgebackward')
@@ -93,6 +95,9 @@ $(function() {
   const $munudgeforward     = $('#munudgeforward'); 
   const $sigmanudgebackward = $('#sigmanudgebackward'); 
   const $sigmanudgeforward  = $('#sigmanudgeforward'); 
+
+  const $dfnudgebackward    = $('#dfnudgebackward'); 
+  const $dfnudgeforward     = $('#dfnudgeforward'); 
 
   //api for getting width, height of element - only gets element, not entire DOM
   // https://www.digitalocean.com/community/tutorials/js-resize-observer
@@ -105,6 +110,21 @@ $(function() {
 
   //#endregion
 
+
+
+  //#region TESTING
+  // $notails.prop('checked', false);
+  // notails = false;
+  // $onetail.prop('checked', false);
+  // onetail = false;
+  // $twotails.prop('checked', true);
+  // twotails = true;
+
+  // $showarea.prop('checked', true);
+  // showarea = true;
+  //#endregion
+
+
   initialise();
 
   //change tabs
@@ -114,7 +134,7 @@ $(function() {
 
     if (tab === 'Normal') {   
       removeCriticalTails();
-      removetPDF();
+      removeTPDF();
 
       setupDisplay();
 
@@ -126,7 +146,7 @@ $(function() {
 
       setupDisplay();
 
-      drawtPDF();
+      drawTPDF();
     }
   });
 
@@ -163,7 +183,7 @@ $(function() {
 
     zmu    = 0;
     zsd    = 1;
-    df     = 1000;
+    df     = 10;
 
     setupSliders()
 
@@ -229,61 +249,91 @@ $(function() {
       }
     })
 
-    $('#zslider').ionRangeSlider({
+    $('#dfslider').ionRangeSlider({
       skin: 'big',
-      type: 'double',
-      min: -5,
-      max: 5,
-      from: -5,
-      to: 5,
-      step: 0.01,
+      type: 'single',
+      min: 1,
+      max: 50,
+      from: df,
+      step: 1,
       grid: true,
       grid_num: 10,
       //on slider handles change
       onChange: function (data) {
-        //want to refer to these values elsewhere. Have to do two tails at end otherwise hangs
-        zfrom = data.from;
-        zto   = data.to;
-        drawCriticalValueLines();
-      },
-      onFinish: function (data) {
-        if (twotails) {  //make both tails the same
-          zfrom = data.from;
-          zto   = data.to;
-          if (zfrom !== oldzfrom) {  //from slider changed
-            zto = -zfrom;
-            oldzfrom = zfrom;
-            oldzto = zto;
-            setSliders();
-          }
-          else if (zto !== oldzto) {  //to slider changed 
-            zfrom = -zto;
-            oldzfrom = zfrom;
-            oldzto = zto;
-            setSliders();
-          } 
-          drawCriticalValueLines();
-        }
-
+        df = data.from;
+        $df.val(df);
+        createT();
+        drawTPDF();
       }
     })
+
+    $('#zslider').ionRangeSlider({
+      skin: 'big',
+      type: 'double',
+      min: -5.000,
+      max: 5.000,
+      from: -5.000,
+      to: 5.000,
+      step: 0.005,
+      grid: true,
+      grid_num: 10,
+      prettify: prettify,
+      //on slider handles change
+      onChange: function (data) {
+        zfrom = data.from;
+        zto   = data.to;
+
+        if (notails || onetail) {
+        }
+        if (twotails) {
+          if (zfrom !== oldzfrom) {   //"from" slider changed
+            zto = -zfrom;
+          }
+          else if (zto !== oldzto) {  //"to" slider changed 
+            zfrom = -zto;
+          } 
+        }
+        drawCriticalValueLines();
+        //setSliders(); //it just doesn't work here. slider is too slow to respond I think
+      },
+
+      onFinish: function (data) {
+        setSliders();
+      }
+    })
+
+    function setSliders() {
+      oldzfrom = zfrom;
+      oldzto   = zto;
+      $zslider.update( {
+        from: zfrom,
+        to:   zto
+      })
+    }
+  
+    function prettify(num) {
+      return num.toFixed(3);
+    }
 
     //get reference to sliders
     $muslider    = $("#muslider").data("ionRangeSlider");
     $sigmaslider = $("#sigmaslider").data("ionRangeSlider");
+    $dfslider    = $("#dfslider").data("ionRangeSlider");
     $zslider     = $("#zslider").data("ionRangeSlider");
+
 
     $mu.val(mu);
     $sigma.val(sigma);
 
-    zfrom = -5;
-    zto = 5;
+    $df.val(df);
+
+    zfrom = -5.000;
+    zto = 5.000;
 
     //create some old values so I can see which slider has changed
-    oldzfrom = -5;
-    oldzto   = 5;
+    oldzfrom = -5.000;
+    oldzto   = 5.000;
   }
-
 
   function resize() {
     //have to watch out as the width and height do not always seem presice to pixels
@@ -332,7 +382,7 @@ $(function() {
       let left  = mu-5*sigma
       let right = mu+5*sigma
 
-      xt = d3.scaleLinear().domain([left, right]).range([margin.left-1, width+2]);
+      xt = d3.scaleLinear().domain([left, right]).range([margin.left-2, width+4]);
 
       //top horizontal axis
       let xAxisA = d3.axisTop(xt);
@@ -351,7 +401,7 @@ $(function() {
     d3.selectAll('.bottomaxis').remove();
     d3.selectAll('.bottomaxistext').remove();
 
-    xb = d3.scaleLinear().domain([-5.0, 5.0]).range([margin.left-1, width+2]);
+    xb = d3.scaleLinear().domain([-5.000, 5.000]).range([margin.left-2, width+4]);
 
     //bottom horizontal axis
     let xAxisB = d3.axisBottom(xb);
@@ -366,7 +416,7 @@ $(function() {
   function createNormal() {
     normalpdf = [];
 
-    for (let x = -5.0; x <= 5.0; x += 0.005) {
+    for (let x = -5.000; x <= 5.000; x += 0.005) {
       normalpdf.push({ x: x, y: jStat.normal.pdf(x, zmu, zsd) })
     }
 
@@ -409,22 +459,45 @@ $(function() {
   function createT() {
     tpdf = [];
     for (let x = -5; x < 5; x += 0.1) {
+      
       tpdf.push({ x: x, y: jStat.studentt.pdf(x, df) })
     }
 
     //scale it to fit in with drawing area
-    let functionHeight = d3.max(tpdf, function(d) { return d.y});
+    //let functionHeight = d3.max(tpdf, function(d) { return d.y});
     tpdf.forEach(function(v) {
-      v.y = v.y * realHeight / functionHeight * sigma;
+
+      //v.y = v.y * realHeight / functionHeight;
+      v.y = v.y * 230;
+
     })
-  }
 
-  function drawtPDF() {
 
   }
 
-  function removetPDF() {
+  function drawTPDF() {
+    removeTPDF();
 
+    //create a generator
+    line = d3.line()
+      .x(function(d, i) { return xb(d.x); })
+      .y(function(d, i) { return y(d.y); });
+
+    //display the curve
+    svgP.append('path').attr('class', 'studenttpdf').attr('d', line(tpdf)).attr('stroke', 'red').attr('fill', 'none').attr('stroke-width', 2)
+
+  }
+
+  function removeTPDF() {
+    d3.selectAll('.studenttpdf').remove();
+  }
+
+  function showTPDF() {
+    d3.selectAll('.studenttpdf').show();
+  }
+
+  function hideTPDF() {
+    d3.selectAll('.studenttpdf').hide();
   }
 
   /*-------------------------------------tails control---------------------------------------*/
@@ -448,6 +521,7 @@ $(function() {
   })
 
   function drawCriticalValueLines() {
+
     removeCriticalTails()
 
     if (!notails) {
@@ -473,27 +547,39 @@ $(function() {
 
         svgP.append('path').attr('class', 'criticalregionrighttail').attr('d', arearighttail(normalpdf));
 
+
+        drawNormalPDF();
+
         if (showarea) {
           let pfromlt = jStat.normal.cdf(zfrom, zmu, zsd); //prob from slider less than
           let pfromgt = 1 - pfromlt;                       //prob from slider less than   
           let ptolt   = jStat.normal.cdf(zto, zmu, zsd);   //prob to slider less than
           let ptogt   = 1 - ptolt;                         //prob to slider greater than
+          let mid;
 
           pfromlt = pfromlt.toFixed(4);
           pfromgt = pfromgt.toFixed(4);
           ptolt   = ptolt.toFixed(4);
           ptogt   = ptogt.toFixed(4);
 
-          svgP.append('text').text(pfromlt).attr('class', 'probability').attr('x', width/2 - 220).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
-          svgP.append('text').text(pfromgt).attr('class', 'probability').attr('x', width/2 - 150).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
-          svgP.append('text').text(ptolt).attr('class',   'probability').attr('x', width/2 + 150).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
-          svgP.append('text').text(ptogt).attr('class',   'probability').attr('x', width/2 + 220).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+          mid = Math.abs((1 - ptolt - pfromgt)).toFixed(4); 
+
+          //add a background rectangle to get background colour for text
+          svgP.append('rect').attr('class', 'probability').attr('x',xb(zfrom) - 75 ).attr('y', rheight - 50).attr('width', 70).attr('height', 27).attr('fill', 'white').attr('stroke', 'black').attr('stroke-width', 1);
+          svgP.append('text').text(pfromlt).attr('class', 'probability').attr('x', xb(zfrom) - 70).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+          // svgP.append('text').text(pfromgt).attr('class', 'probability').attr('x', xb(zfrom) + 5).attr('y', rheight - 10).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+          // svgP.append('text').text(ptolt).attr('class',   'probability').attr('x', xb(zto) - 60).attr('y', rheight - 50).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+
+          svgP.append('rect').attr('class', 'probability').attr('x', width/2 - 6 ).attr('y', rheight - 100).attr('width', 70).attr('height', 27).attr('fill', 'lemonchiffon').attr('stroke', 'black').attr('stroke-width', 1);
+          svgP.append('text').text(mid).attr('class',   'probability').attr('x', width/2 - 0).attr('y', rheight - 80).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+
+          svgP.append('rect').attr('class', 'probability').attr('x',xb(zto) + 5 ).attr('y', rheight - 50).attr('width', 70).attr('height', 27).attr('fill', 'white').attr('stroke', 'black').attr('stroke-width', 1);
+          svgP.append('text').text(ptogt).attr('class',   'probability').attr('x', xb(zto) + 15).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
         }
 
       }
     }
 
-    drawNormalPDF();
   }
 
   function removeCriticalTails() {
@@ -501,13 +587,6 @@ $(function() {
     svgP.selectAll('.criticalregionlefttail').remove();
     svgP.selectAll('.criticalregionrighttail').remove();
     svgP.selectAll('.probability').remove();
-  }
-
-  function setSliders() {
-    $zslider.update( {
-      from: zfrom,
-      to:   zto
-    })
   }
 
   //not used on resize
@@ -524,9 +603,9 @@ $(function() {
   $showmuline.on('change', function() {
     showmuline = $showmuline.prop('checked');
     if (showmuline) {
-      svgP.append('line').attr('class', 'muline').attr('x1', xb(0)+1).attr('y1', y(0)).attr('x2', xb(0)+1).attr('y2', y(realHeight)).attr('stroke', 'black').attr('stroke-width', 2);
+      svgP.append('line').attr('class', 'muline').attr('x1', xb(0)).attr('y1', y(0)).attr('x2', xb(0)).attr('y2', y(realHeight)).attr('stroke', 'black').attr('stroke-width', 2);
       //extend to top axis as well
-      svgTopAxis.append('line').attr('class', 'muline').attr('x1', xb(0)+1).attr('y1', 40).attr('x2', xb(0)+1).attr('y2', 80).attr('stroke', 'black').attr('stroke-width', 2);
+      svgTopAxis.append('line').attr('class', 'muline').attr('x1', xb(0)).attr('y1', 40).attr('x2', xb(0)).attr('y2', 80).attr('stroke', 'black').attr('stroke-width', 2);
 
     }
     else {
@@ -593,25 +672,25 @@ $(function() {
   })
 
   $leftnudgebackward.on('click', function(e) {
-    if (zfrom > -5) zfrom -= 0.01;
+    if (zfrom > -5) zfrom -= 0.005;
     if (twotails) zto = -zfrom;
     zsliderUpdate();
   })
 
   $leftnudgeforward.on('click', function(e) {
-    if (zfrom < 5) zfrom += 0.01;
+    if (zfrom < 5) zfrom += 0.005;
     if (twotails) zto = -zfrom;
     zsliderUpdate();
   })
 
   $rightnudgebackward.on('click', function(e) {
-    if (zto > -5) zto -= 0.01;
+    if (zto > -5) zto -= 0.005;
     if (twotails) zfrom = -zto;
     zsliderUpdate();
   })
 
   $rightnudgeforward.on('click', function(e) {
-    if (zto < 5) zto += 0.01;
+    if (zto < 5) zto += 0.005;
     if (twotails) zfrom = -zto;
     zsliderUpdate();
   })
@@ -622,8 +701,9 @@ $(function() {
     $zslider.update( { from: zfrom, to: zto })
     drawCriticalValueLines();
   }
+
   /*-----------------------------------------mu sigma --------------------------------------*/
-  //change to the mu, sigma checkboxes
+  //changes to the mu, sigma checkboxes
   $mu.on('change', function() {
     mu = parseFloat($mu.val());
     updateMu();
@@ -672,6 +752,31 @@ $(function() {
     setTopAxis();   
   }
 
+  //changes to the dfcheckboxes
+  $df.on('change', function() {
+    df = parseFloat($df.val());
+    updateDF();
+  })
+
+  $dfnudgebackward.on('click', function() {
+    df -= 1;
+    $df.val(df);
+    updateDF();
+  })
+
+  $dfnudgeforward.on('click', function() {
+    df += 1;
+    $df.val(df);
+    updateDF();
+  })
+
+  function updateDF() {
+    $dfslider.update({
+      from: df
+    })
+ 
+  }
+  
   /*---------------------------------------------Tooltips on or off-------------------------------------- */
 
   function setTooltips() {
