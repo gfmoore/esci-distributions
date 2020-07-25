@@ -1,7 +1,7 @@
 /*
 Program       esci-distributions.css
 Author        Gordon Moore
-Date          25 July 2020
+Date          21 July 2020
 Description   CSS for esci distributions
 Licence       GNU General Public LIcence Version 3, 29 June 2007
 */
@@ -9,6 +9,7 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 /* #region Version history
 
 0.0.1       Initial version
+0.1.0       2020-07-25 The first version releaed
 
 #endregion */
 
@@ -173,36 +174,80 @@ margin-left: 0.5rem;
 }
 
 
-/*---------------Student t tab---------------*/
+/*--------------------------------Student t tab----------------------------------------------------------------*/
 
-/*--------------------df slider--------------------------------------------------------------------*/
+/*--------------------------------4 radio buttons for z or t----------------------------------------------------*/
+
+#ztselect {
+  border: 1px solid black;
+  background-color: #FFFF99;
+  padding-left: 0.5rem;
+  padding-top: 0.5rem;
+  padding-bottom: 1rem;
+  height: 25rem;
+}
+
+/*--------------------------------df slider--------------------------------------------------------------------*/
 
 #tab-2 {
   font-size: 1.8rem !important;
 }
 
 #df {
-  background-color: #FFFF99;
-  border: 1px solid black;
-  height: 12rem;
+  padding-top: 2rem;
 }
 
 #dfblock  {
   display: grid;
-  grid-template-columns: 2.5rem 25rem 2rem 1rem 5rem;
+  grid-template-columns: 2.5rem 24rem 2rem 1rem 5rem;
   grid-row-gap: 3rem;
   margin-top: 2rem;
 }
 
 #dfdiv {
   padding-top: 2.5rem; 
-  margin-left: 0.3rem;
   font-size: 2.0rem;
 }
 
 #dfval {
   margin-top: 2.8rem;
   margin-left: 2rem;
+}
+
+/*----------------------------------------5 t tails-------------------------------------------------*/
+
+#ttailspanel {
+  background-color: #FFCC99;
+  border: 1px solid black;
+  padding-left: 0.5rem;
+  padding-top: 0.5rem;
+  padding-bottom: 1rem;
+}
+
+#ttails {
+  margin: 1rem;
+}
+
+#tshowarea {
+  margin-left: 5rem;
+}
+
+/*---------------------------------------6. Lines--------------------------------------------------*/
+
+#tlines {
+  background-color: #CCFFFF;
+  border: 1px solid black;
+  padding-left: 0.5rem;
+  padding-top: 0.5rem;
+  padding-bottom: 1rem;
+}
+
+#tmuzline {
+  margin: 1rem;
+}
+
+#tshowzline {
+  margin-left: 5rem;
 }
 
 /*----------------------------------display---------------------------------------------------------*/
@@ -276,22 +321,17 @@ margin-left: 0.5rem;
 }
 
 .criticalregionlefttail {
-  fill: lightsteelblue;
+  
   stroke-width: 0;
 }
 
 .criticalregionrighttail {
-  fill: lightsteelblue;
+  
   stroke-width: 0;
 }
 
 /*---------------------------------svg style----------------------------------------------------------*/
 
-.normalpdf {
-  fill: none;
-  stroke-width: 3px;
-  stroke: blue;
-}
 
 
 /*-----------------------------------------------------------------------------------------------------*/

@@ -1,18 +1,19 @@
 /*
 Program       esci-distributions.js
 Author        Gordon Moore
-Date          25 July 2020
+Date          21 July 2020
 Description   The JavaScript code for esci-distributions
 Licence       GNU General Public LIcence Version 3, 29 June 2007
 */
 
 // #region Version history
 /*
-0.1.0                 Initial version
+0.0.1         Initial version
+0.1.0         2020-07-25 The first version
 */
 //#endregion 
 
-let version = '0.0.1';
+let version = '0.1.0';
 
 'use strict';
 $(function() {
@@ -50,19 +51,25 @@ $(function() {
 
   let normalpdf = [];                                       //the array holding the normal distribution
   let tpdf = [];                                            //the array holding the student t distribution
-
   let functionHeight;                                       //get max height of pdf function
+  let tfunctionHeight;
   let dfrom, dto;                                           //frequency density (height) on pdf
-
-  let $zslider;                                              //reference to slider
-  let zfrom, zto;                                            //the current from to values on the slider
-  let oldzfrom, oldzto;                                      //remember old (previous) values to determine whcih slider changed
+  let dtfrom, dtto;                                         //frequency density for t
+  let $zslider;                                             //reference to slider
+  let zfrom, zto;                                           //the current from to values on the slider
+  let oldzfrom, oldzto;                                     //remember old (previous) values to determine whcih slider changed
 
   //cache jquery properties (faster)
   $mu    = $('#muval');
   $sigma = $('#sigmaval');
 
   $df    = $('#dfval');
+
+  let pfromlt;
+  let pfromgt;
+  let ptolt;
+  let ptogt;
+  let mid;
 
   const $showarea  = $('#showarea');
   let showarea     = false;
@@ -85,11 +92,30 @@ $(function() {
   let units         = 'IQ Points';
   $units.val(units);
 
- 
+  const $z      = $('#z');
+  let   z       = true;
+  const $t      = $('#t');
+  let   t       = false;
+  const $zandt  = $('#zandt');
+  let   zandt   = false;
+
+  //student t tails
+  const $tshowarea  = $('#tshowarea');
+  const $tnotails   = $('#tnotails');
+  const $tonetail   = $('#tonetail');
+  const $ttwotails  = $('#ttwotails');
+  //vars already defined and reused
+
+
+  $tshowmuline      = $('#tshowmuline');
+  tshowmuline       = false;
+  $tshowtzline     = $('#tshowtzline');
+  tshowtzline      = false;
+
   const $leftnudgebackward  = $('#leftnudgebackward')
-  const $leftnudgeforward  =  $('#leftnudgeforward');
+  const $leftnudgeforward   = $('#leftnudgeforward');
   const $rightnudgebackward = $('#rightnudgebackward')
-  const $rightnudgeforward =  $('#rightnudgeforward');
+  const $rightnudgeforward  = $('#rightnudgeforward');
 
   const $munudgebackward    = $('#munudgebackward'); 
   const $munudgeforward     = $('#munudgeforward'); 
@@ -132,6 +158,9 @@ $(function() {
     if (tabIndex === 0) tab = 'Normal';
     if (tabIndex === 1) tab = 'Studentt';
 
+    removemuline();
+    removezlines();
+
     if (tab === 'Normal') {   
       removeCriticalTails();
       removeTPDF();
@@ -139,6 +168,10 @@ $(function() {
       setupDisplay();
 
       drawNormalPDF();
+
+      if (showmuline) drawmuline();
+      if (showzline) drawzlines();
+
     }
     if (tab === 'Studentt') {   //Student t
       removeCriticalTails();
@@ -147,6 +180,9 @@ $(function() {
       setupDisplay();
 
       drawTPDF();
+
+      if (tshowmuline) drawmuline();
+      if (tshowtzline) drawzlines();
     }
   });
 
@@ -264,6 +300,7 @@ $(function() {
         $df.val(df);
         createT();
         drawTPDF();
+        drawCriticalValueLines();
       }
     })
 
@@ -345,10 +382,11 @@ $(function() {
     width   = rwidth - margin.left - margin.right;  
     heightP = rheight - margin.top - margin.bottom;
 
-    clearNormal();
+    clear();
+
   }
 
-  function clearNormal() {
+  function clear() {
     setupDisplay();
 
     createNormal();
@@ -357,8 +395,11 @@ $(function() {
     removeCriticalTails();
     //resetCriticalTails();
     removeNormalPDF();
-    drawNormalPDF();
-    drawCriticalValueLines()
+    removeTPDF();
+    if (tab === 'Normal') drawNormalPDF();
+    if (tab === 'Studentt') drawTPDF();
+    
+    drawCriticalValueLines();
 
   }
 
@@ -409,7 +450,7 @@ $(function() {
 
     //add some text labels
     if (tab === 'Normal')   svgBottomAxis.append('text').text('z').attr('class', 'bottomaxistext').attr('x', width/2 + 100).attr('y', 40).attr('text-anchor', 'start').attr('fill', 'black');
-    if (tab === 'Studentt') svgBottomAxis.append('text').text('t').attr('class', 'bottomaxistext').attr('x', width/2 + 100).attr('y', 40).attr('text-anchor', 'start').attr('fill', 'black');
+    if (tab === 'Studentt') svgBottomAxis.append('text').text('z or t').attr('class', 'bottomaxistext').attr('x', width/2 + 100).attr('y', 40).attr('text-anchor', 'start').attr('fill', 'black');
 
   }
 
@@ -429,7 +470,8 @@ $(function() {
   }
 
   function scaleypdf(y) {
-    return y * realHeight / functionHeight * 0.9 + 0.2;
+    //return y * realHeight / functionHeight * 0.9 + 0.2;
+    return y * 250;
   }
 
   function drawNormalPDF() {
@@ -440,7 +482,8 @@ $(function() {
       .y(function(d, i) { return y(d.y); });
 
     //display the curve
-    svgP.append('path').attr('class', 'normalpdf').attr('d', line(normalpdf))
+    svgP.append('path').attr('class', 'normalpdf').attr('d', line(normalpdf)).attr('stroke', 'blue').attr('stroke-width', 3).attr('fill', 'none');
+
   }
 
   function removeNormalPDF() {
@@ -457,47 +500,60 @@ $(function() {
 
   
   function createT() {
+    createNormal();  //just in case not done so
+
     tpdf = [];
-    for (let x = -5; x < 5; x += 0.1) {
-      
+
+    for (let x = -5.000; x < 5.000; x += 0.005) {
       tpdf.push({ x: x, y: jStat.studentt.pdf(x, df) })
     }
 
     //scale it to fit in with drawing area
-    //let functionHeight = d3.max(tpdf, function(d) { return d.y});
+    tfunctionHeight = d3.max(tpdf, function(d) { return d.y});
     tpdf.forEach(function(v) {
-
-      //v.y = v.y * realHeight / functionHeight;
-      v.y = v.y * 230;
-
+      v.y = tscaleypdf(v.y);
     })
+  }
 
-
+  function tscaleypdf(y) {
+    //return y * realHeight / tfunctionHeight * 0.9 + 0.2;
+    return y * 250;
   }
 
   function drawTPDF() {
     removeTPDF();
+    removeNormalPDF();
 
     //create a generator
     line = d3.line()
       .x(function(d, i) { return xb(d.x); })
       .y(function(d, i) { return y(d.y); });
 
-    //display the curve
-    svgP.append('path').attr('class', 'studenttpdf').attr('d', line(tpdf)).attr('stroke', 'red').attr('fill', 'none').attr('stroke-width', 2)
+    //display the curves
+    if (t || zandt) svgP.append('path').attr('class', 'tpdf').attr('d', line(tpdf)).attr('stroke', 'red').attr('fill', 'none').attr('stroke-width', 3)
+    if (z || zandt) svgP.append('path').attr('class', 'tpdf').attr('d', line(normalpdf)).attr('stroke', 'blue').attr('fill', 'none').attr('stroke-width', 3)
 
+    //add some labels to graph
+    if (z || zandt) {
+      svgP.append('line').attr('class', 'tpdf').attr('x1', 30).attr('y1', 30).attr('x2', 60).attr('y2', 30).attr('stroke', 'blue' ).attr('stroke-width', 3);
+      svgP.append('text').text('Normal').attr('class', 'tpdf').attr('x',70 ).attr('y', 33 ).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+    }
+    if (t || zandt) {
+      svgP.append('line').attr('class', 'tpdf').attr('x1', 30).attr('y1', 60).attr('x2', 60).attr('y2', 60).attr('stroke', 'red' ).attr('stroke-width', 3);
+      svgP.append('text').text('t').attr('class', 'tpdf').attr('x',70 ).attr('y', 63 ).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").style('font-style', 'italic').attr('fill', 'black');
+    }
   }
 
   function removeTPDF() {
-    d3.selectAll('.studenttpdf').remove();
+    d3.selectAll('.tpdf').remove();
   }
 
   function showTPDF() {
-    d3.selectAll('.studenttpdf').show();
+    d3.selectAll('.tpdf').show();
   }
 
   function hideTPDF() {
-    d3.selectAll('.studenttpdf').hide();
+    d3.selectAll('.tpdf').hide();
   }
 
   /*-------------------------------------tails control---------------------------------------*/
@@ -520,6 +576,26 @@ $(function() {
     drawCriticalValueLines();   
   })
 
+  $tshowarea.on('change', function() {
+    showarea = $tshowarea.prop('checked');
+    drawCriticalValueLines();
+  })
+
+  $("input[name='ttails']").change(function() {
+    notails  = $tnotails.prop('checked');
+    onetail  = $tonetail.prop('checked');
+    twotails = $ttwotails.prop('checked'); 
+    if (twotails) {
+      zfrom = -zto; //had to choose one side
+      zoldfrom = zfrom
+      zoldto = zto;
+      $zslider.update( { from: zfrom, to: zto })
+    }
+    drawCriticalValueLines();   
+  })
+
+
+  /*-----------------------------------draw the critical value areas and values-------------------------*/
   function drawCriticalValueLines() {
 
     removeCriticalTails()
@@ -527,57 +603,129 @@ $(function() {
     if (!notails) {
 
       if (onetail || twotails) {
+        //normal  //I think I can use this in "normal" and "normal and t"
         dfrom = scaleypdf(jStat.normal.pdf(zfrom, zmu, zsd));
         dto =   scaleypdf(jStat.normal.pdf(zto, zmu, zsd));
 
-        svgP.append('line').attr('class', 'criticalvalueline').attr('x1', xb(zfrom)).attr('y1', y(0)).attr('x2', xb(zfrom)).attr('y2', y(dfrom)).attr('stroke', 'black').attr('stroke-width', 2);
-        svgP.append('line').attr('class', 'criticalvalueline').attr('x1', xb(zto)).attr('y1', y(0)).attr('x2', xb(zto)).attr('y2', y(dto)).attr('stroke', 'black').attr('stroke-width', 2);
+        //student t
+        dtfrom = tscaleypdf(jStat.studentt.pdf(zfrom, df));
+        dtto =   tscaleypdf(jStat.studentt.pdf(zto, df));
 
+        //fill the critical regions first
         arealefttail = d3.area()
           .x(function(d) { return xb(d.x) })
           .y1(y(0))
           .y0(function(d) { if (d.x < zfrom) return y(d.y); else return y(0); });
-
-        svgP.append('path').attr('class', 'criticalregionlefttail').attr('d', arealefttail(normalpdf));
 
         arearighttail = d3.area()
           .x(function(d) { return xb(d.x) })
           .y1(y(0))
           .y0(function(d) { if (d.x > zto) return y(d.y); else return y(0); });      
 
-        svgP.append('path').attr('class', 'criticalregionrighttail').attr('d', arearighttail(normalpdf));
+        if (tab === 'Normal') {
+          svgP.append('path').attr('class', 'criticalregionlefttail').attr('d', arealefttail(normalpdf)).attr('fill', 'lightsteelblue');
+          svgP.append('path').attr('class', 'criticalregionrighttail').attr('d', arearighttail(normalpdf)).attr('fill', 'lightsteelblue');
+        }
+
+        if (tab === 'Studentt') {
+          if (z) {
+            svgP.append('path').attr('class', 'criticalregionlefttail').attr('d', arealefttail(normalpdf)).attr('fill', 'lightsteelblue');
+            svgP.append('path').attr('class', 'criticalregionrighttail').attr('d', arearighttail(normalpdf)).attr('fill', 'lightsteelblue');  
+          }
+          if (t || zandt) {
+            svgP.append('path').attr('class', 'criticalregionlefttail').attr('d', arealefttail(tpdf)).attr('fill', 'pink');
+            svgP.append('path').attr('class', 'criticalregionrighttail').attr('d', arearighttail(tpdf)).attr('fill', 'pink');  
+          }
+        }
+
+        //now draw the critical lines
+        if (tab === 'Normal') {
+          svgP.append('line').attr('class', 'criticalvalueline').attr('x1', xb(zfrom)).attr('y1', y(0)).attr('x2', xb(zfrom)).attr('y2', y(dfrom)).attr('stroke', 'black').attr('stroke-width', 2);
+          svgP.append('line').attr('class', 'criticalvalueline').attr('x1', xb(zto)).attr('y1', y(0)).attr('x2', xb(zto)).attr('y2', y(dto)).attr('stroke', 'black').attr('stroke-width', 2);
+        }
+
+        //student-t tab
+        if (tab === 'Studentt') {
+          if (z) {
+            svgP.append('line').attr('class', 'criticalvalueline').attr('x1', xb(zfrom)).attr('y1', y(0)).attr('x2', xb(zfrom)).attr('y2', y(dfrom)).attr('stroke', 'blue').attr('stroke-width', 2);
+            svgP.append('line').attr('class', 'criticalvalueline').attr('x1', xb(zto)).attr('y1', y(0)).attr('x2', xb(zto)).attr('y2', y(dto)).attr('stroke', 'blue').attr('stroke-width', 2);
+          }
+          if (t || zandt) {
+            svgP.append('line').attr('class', 'criticalvalueline').attr('x1', xb(zfrom)).attr('y1', y(0)).attr('x2', xb(zfrom)).attr('y2', y(dtfrom)).attr('stroke', 'red').attr('stroke-width', 2);
+            svgP.append('line').attr('class', 'criticalvalueline').attr('x1', xb(zto)).attr('y1', y(0)).attr('x2', xb(zto)).attr('y2', y(dtto)).attr('stroke', 'red').attr('stroke-width', 2);
+          }
+        }
+
+        //redraw the curves over the area and lines for appearance sake
+        if (tab === 'Normal') drawNormalPDF();
+        if (tab === 'Studentt') drawTPDF();
 
 
-        drawNormalPDF();
-
+        //Areas - Now display some values
         if (showarea) {
-          let pfromlt = jStat.normal.cdf(zfrom, zmu, zsd); //prob from slider less than
-          let pfromgt = 1 - pfromlt;                       //prob from slider less than   
-          let ptolt   = jStat.normal.cdf(zto, zmu, zsd);   //prob to slider less than
-          let ptogt   = 1 - ptolt;                         //prob to slider greater than
-          let mid;
+          if (tab === 'Normal' || (tab === 'Studentt' && z)) {
+            pfromlt = jStat.normal.cdf(zfrom, zmu, zsd); //prob from slider less than
+            pfromgt = 1 - pfromlt;                       //prob from slider less than   
+            ptolt   = jStat.normal.cdf(zto, zmu, zsd);   //prob to slider less than
+            ptogt   = 1 - ptolt;                         //prob to slider greater than
+            mid;
 
-          pfromlt = pfromlt.toFixed(4);
-          pfromgt = pfromgt.toFixed(4);
-          ptolt   = ptolt.toFixed(4);
-          ptogt   = ptogt.toFixed(4);
+            pfromlt = pfromlt.toFixed(4);
+            pfromgt = pfromgt.toFixed(4);
+            ptolt   = ptolt.toFixed(4);
+            ptogt   = ptogt.toFixed(4);
 
-          mid = Math.abs((1 - ptolt - pfromgt)).toFixed(4); 
+            mid = Math.abs((1 - ptolt - pfromgt)).toFixed(4); 
 
-          //add a background rectangle to get background colour for text
-          svgP.append('rect').attr('class', 'probability').attr('x',xb(zfrom) - 75 ).attr('y', rheight - 50).attr('width', 70).attr('height', 27).attr('fill', 'white').attr('stroke', 'black').attr('stroke-width', 1);
-          svgP.append('text').text(pfromlt).attr('class', 'probability').attr('x', xb(zfrom) - 70).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
-          // svgP.append('text').text(pfromgt).attr('class', 'probability').attr('x', xb(zfrom) + 5).attr('y', rheight - 10).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
-          // svgP.append('text').text(ptolt).attr('class',   'probability').attr('x', xb(zto) - 60).attr('y', rheight - 50).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+            //add a background rectangle to get background colour for text
+            svgP.append('rect').attr('class', 'probability').attr('x',xb(zfrom) - 75 ).attr('y', rheight - 50).attr('width', 70).attr('height', 27).attr('fill', 'white').attr('stroke', 'black').attr('stroke-width', 1);
+            svgP.append('text').text(pfromlt).attr('class', 'probability').attr('x', xb(zfrom) - 70).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
 
-          svgP.append('rect').attr('class', 'probability').attr('x', width/2 - 6 ).attr('y', rheight - 100).attr('width', 70).attr('height', 27).attr('fill', 'lemonchiffon').attr('stroke', 'black').attr('stroke-width', 1);
-          svgP.append('text').text(mid).attr('class',   'probability').attr('x', width/2 - 0).attr('y', rheight - 80).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+            svgP.append('rect').attr('class', 'probability').attr('x', width/2 - 6 ).attr('y', rheight - 100).attr('width', 70).attr('height', 27).attr('fill', 'lemonchiffon').attr('stroke', 'black').attr('stroke-width', 1);
+            svgP.append('text').text(mid).attr('class',   'probability').attr('x', width/2 - 0).attr('y', rheight - 80).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
 
-          svgP.append('rect').attr('class', 'probability').attr('x',xb(zto) + 5 ).attr('y', rheight - 50).attr('width', 70).attr('height', 27).attr('fill', 'white').attr('stroke', 'black').attr('stroke-width', 1);
-          svgP.append('text').text(ptogt).attr('class',   'probability').attr('x', xb(zto) + 15).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+            svgP.append('rect').attr('class', 'probability').attr('x',xb(zto) + 5 ).attr('y', rheight - 50).attr('width', 70).attr('height', 27).attr('fill', 'white').attr('stroke', 'black').attr('stroke-width', 1);
+            svgP.append('text').text(ptogt).attr('class',   'probability').attr('x', xb(zto) + 15).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+          }
+
+          if (tab === 'Studentt' && (t || zandt)) {
+            let pfromlt = jStat.studentt.cdf(zfrom, df); //prob from slider less than
+            let pfromgt = 1 - pfromlt;                       //prob from slider less than   
+            let ptolt   = jStat.studentt.cdf(zto, df);   //prob to slider less than
+            let ptogt   = 1 - ptolt;                         //prob to slider greater than
+            let mid;
+
+            pfromlt = pfromlt.toFixed(4);
+            pfromgt = pfromgt.toFixed(4);
+            ptolt   = ptolt.toFixed(4);
+            ptogt   = ptogt.toFixed(4);
+
+            mid = Math.abs((1 - ptolt - pfromgt)).toFixed(4); 
+
+            //add a background rectangle to get background colour for text
+            svgP.append('rect').attr('class', 'probability').attr('x',xb(zfrom) - 75 ).attr('y', rheight - 50).attr('width', 70).attr('height', 27).attr('fill', 'white').attr('stroke', 'black').attr('stroke-width', 1);
+            svgP.append('text').text(pfromlt).attr('class', 'probability').attr('x', xb(zfrom) - 70).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+
+            svgP.append('rect').attr('class', 'probability').attr('x', width/2 - 6 ).attr('y', rheight - 100).attr('width', 70).attr('height', 27).attr('fill', 'lemonchiffon').attr('stroke', 'black').attr('stroke-width', 1);
+            svgP.append('text').text(mid).attr('class',   'probability').attr('x', width/2 - 0).attr('y', rheight - 80).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+
+            svgP.append('rect').attr('class', 'probability').attr('x',xb(zto) + 5 ).attr('y', rheight - 50).attr('width', 70).attr('height', 27).attr('fill', 'white').attr('stroke', 'black').attr('stroke-width', 1);
+            svgP.append('text').text(ptogt).attr('class',   'probability').attr('x', xb(zto) + 15).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+
+          }
+
         }
 
       }
+    }
+
+    if (tab === 'Normal') {
+      drawmuline();
+      drawzlines()
+    }
+    if (tab === 'Studentt') {
+      drawmuline();
+      drawzlines();
     }
 
   }
@@ -602,10 +750,19 @@ $(function() {
 
   $showmuline.on('change', function() {
     showmuline = $showmuline.prop('checked');
-    if (showmuline) {
+    drawmuline();
+  })
+
+  $showzline.on('change', function() {
+    showzline = $showzline.prop('checked');
+    drawzlines();
+  })
+
+  function drawmuline() {
+    if (showmuline || tshowmuline) {
       svgP.append('line').attr('class', 'muline').attr('x1', xb(0)).attr('y1', y(0)).attr('x2', xb(0)).attr('y2', y(realHeight)).attr('stroke', 'black').attr('stroke-width', 2);
       //extend to top axis as well
-      svgTopAxis.append('line').attr('class', 'muline').attr('x1', xb(0)).attr('y1', 40).attr('x2', xb(0)).attr('y2', 80).attr('stroke', 'black').attr('stroke-width', 2);
+      if (tab === 'Normal') svgTopAxis.append('line').attr('class', 'muline').attr('x1', xb(0)).attr('y1', 40).attr('x2', xb(0)).attr('y2', 80).attr('stroke', 'black').attr('stroke-width', 2);
 
     }
     else {
@@ -613,51 +770,59 @@ $(function() {
       if (showzline) {
         //show dark grey mu line
         svgP.append('line').attr('class', 'zlines').attr('x1', xb(0)+1).attr('y1', y(0)).attr('x2', xb(0)+1).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 2);
-        svgTopAxis.append('line').attr('class', 'zlines').attr('x1', xb(0)+1).attr('y1', 40).attr('x2', xb(0)+1).attr('y2', 80).attr('stroke', 'darkgrey').attr('stroke-width', 2);
+        if (tab === 'Normal') svgTopAxis.append('line').attr('class', 'zlines').attr('x1', xb(0)+1).attr('y1', 40).attr('x2', xb(0)+1).attr('y2', 80).attr('stroke', 'darkgrey').attr('stroke-width', 2);
       }
     }
-  })
 
-  $showzline.on('change', function() {
-    showzline = $showzline.prop('checked');
-    if (showzline) {
+  }
+
+  function drawzlines() {
+    if (showzline || tshowtzline) {
       let z = 0;
       let s = 1;
-      svgP.append('line').attr('class', 'zlines').attr('x1', xb(z - 5*s)).attr('y1', y(0)).attr('x2', xb(z - 5*s)).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 2);
-      svgP.append('line').attr('class', 'zlines').attr('x1', xb(z - 4*s)).attr('y1', y(0)).attr('x2', xb(z - 4*s)).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 2);
-      svgP.append('line').attr('class', 'zlines').attr('x1', xb(z - 3*s)).attr('y1', y(0)).attr('x2', xb(z - 3*s)).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 2);
-      svgP.append('line').attr('class', 'zlines').attr('x1', xb(z - 2*s)).attr('y1', y(0)).attr('x2', xb(z - 2*s)).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 2);
-      svgP.append('line').attr('class', 'zlines').attr('x1', xb(z - 1*s)).attr('y1', y(0)).attr('x2', xb(z - 1*s)).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 2);
+      svgP.append('line').attr('class', 'zlines').attr('x1', xb(z - 5*s)).attr('y1', y(0)).attr('x2', xb(z - 5*s)).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 1);
+      svgP.append('line').attr('class', 'zlines').attr('x1', xb(z - 4*s)).attr('y1', y(0)).attr('x2', xb(z - 4*s)).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 1);
+      svgP.append('line').attr('class', 'zlines').attr('x1', xb(z - 3*s)).attr('y1', y(0)).attr('x2', xb(z - 3*s)).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 1);
+      svgP.append('line').attr('class', 'zlines').attr('x1', xb(z - 2*s)).attr('y1', y(0)).attr('x2', xb(z - 2*s)).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 1);
+      svgP.append('line').attr('class', 'zlines').attr('x1', xb(z - 1*s)).attr('y1', y(0)).attr('x2', xb(z - 1*s)).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 1);
 
       svgP.append('line').attr('class', 'zlines').attr('x1', xb(z)+1).attr('y1', y(0)).attr('x2', xb(z)+1).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 2);
 
-      svgP.append('line').attr('class', 'zlines').attr('x1', xb(z + 1*s)).attr('y1', y(0)).attr('x2', xb(z + 1*s)).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 2);
-      svgP.append('line').attr('class', 'zlines').attr('x1', xb(z + 2*s)).attr('y1', y(0)).attr('x2', xb(z + 2*s)).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 2);
-      svgP.append('line').attr('class', 'zlines').attr('x1', xb(z + 3*s)).attr('y1', y(0)).attr('x2', xb(z + 3*s)).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 2);
-      svgP.append('line').attr('class', 'zlines').attr('x1', xb(z + 4*s)).attr('y1', y(0)).attr('x2', xb(z + 4*s)).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 2);
-      svgP.append('line').attr('class', 'zlines').attr('x1', xb(z + 5*s)).attr('y1', y(0)).attr('x2', xb(z + 5*s)).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 2);
+      svgP.append('line').attr('class', 'zlines').attr('x1', xb(z + 1*s)).attr('y1', y(0)).attr('x2', xb(z + 1*s)).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 1);
+      svgP.append('line').attr('class', 'zlines').attr('x1', xb(z + 2*s)).attr('y1', y(0)).attr('x2', xb(z + 2*s)).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 1);
+      svgP.append('line').attr('class', 'zlines').attr('x1', xb(z + 3*s)).attr('y1', y(0)).attr('x2', xb(z + 3*s)).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 1);
+      svgP.append('line').attr('class', 'zlines').attr('x1', xb(z + 4*s)).attr('y1', y(0)).attr('x2', xb(z + 4*s)).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 1);
+      svgP.append('line').attr('class', 'zlines').attr('x1', xb(z + 5*s)).attr('y1', y(0)).attr('x2', xb(z + 5*s)).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 1);
 
       //extend to top axis as well
-      svgTopAxis.append('line').attr('class', 'zlines').attr('x1', xb(z - 5*s)).attr('y1', 40).attr('x2', xb(z - 5*s)).attr('y2', 80).attr('stroke', 'darkgrey').attr('stroke-width', 2);
-      svgTopAxis.append('line').attr('class', 'zlines').attr('x1', xb(z - 4*s)).attr('y1', 40).attr('x2', xb(z - 4*s)).attr('y2', 80).attr('stroke', 'darkgrey').attr('stroke-width', 2);
-      svgTopAxis.append('line').attr('class', 'zlines').attr('x1', xb(z - 3*s)).attr('y1', 40).attr('x2', xb(z - 3*s)).attr('y2', 80).attr('stroke', 'darkgrey').attr('stroke-width', 2);
-      svgTopAxis.append('line').attr('class', 'zlines').attr('x1', xb(z - 2*s)).attr('y1', 40).attr('x2', xb(z - 2*s)).attr('y2', 80).attr('stroke', 'darkgrey').attr('stroke-width', 2);
-      svgTopAxis.append('line').attr('class', 'zlines').attr('x1', xb(z - 1*s)).attr('y1', 40).attr('x2', xb(z - 1*s)).attr('y2', 80).attr('stroke', 'darkgrey').attr('stroke-width', 2);
+      if (tab === 'Normal') {
+        svgTopAxis.append('line').attr('class', 'zlines').attr('x1', xb(z - 5*s)).attr('y1', 40).attr('x2', xb(z - 5*s)).attr('y2', 80).attr('stroke', 'darkgrey').attr('stroke-width', 1);
+        svgTopAxis.append('line').attr('class', 'zlines').attr('x1', xb(z - 4*s)).attr('y1', 40).attr('x2', xb(z - 4*s)).attr('y2', 80).attr('stroke', 'darkgrey').attr('stroke-width', 1);
+        svgTopAxis.append('line').attr('class', 'zlines').attr('x1', xb(z - 3*s)).attr('y1', 40).attr('x2', xb(z - 3*s)).attr('y2', 80).attr('stroke', 'darkgrey').attr('stroke-width', 1);
+        svgTopAxis.append('line').attr('class', 'zlines').attr('x1', xb(z - 2*s)).attr('y1', 40).attr('x2', xb(z - 2*s)).attr('y2', 80).attr('stroke', 'darkgrey').attr('stroke-width', 1);
+        svgTopAxis.append('line').attr('class', 'zlines').attr('x1', xb(z - 1*s)).attr('y1', 40).attr('x2', xb(z - 1*s)).attr('y2', 80).attr('stroke', 'darkgrey').attr('stroke-width', 1);
 
-      svgTopAxis.append('line').attr('class', 'zlines').attr('x1', xb(z)+1).attr('y1', 40).attr('x2', xb(z)+1).attr('y2', 80).attr('stroke', 'darkgrey').attr('stroke-width', 2);
+        svgTopAxis.append('line').attr('class', 'zlines').attr('x1', xb(z)+1).attr('y1', 40).attr('x2', xb(z)+1).attr('y2', 80).attr('stroke', 'darkgrey').attr('stroke-width', 2);
 
-      svgTopAxis.append('line').attr('class', 'zlines').attr('x1', xb(z + 1*s)).attr('y1', 40).attr('x2', xb(z + 1*s)).attr('y2', 80).attr('stroke', 'darkgrey').attr('stroke-width', 2);
-      svgTopAxis.append('line').attr('class', 'zlines').attr('x1', xb(z + 2*s)).attr('y1', 40).attr('x2', xb(z + 2*s)).attr('y2', 80).attr('stroke', 'darkgrey').attr('stroke-width', 2);
-      svgTopAxis.append('line').attr('class', 'zlines').attr('x1', xb(z + 3*s)).attr('y1', 40).attr('x2', xb(z + 3*s)).attr('y2', 80).attr('stroke', 'darkgrey').attr('stroke-width', 2);
-      svgTopAxis.append('line').attr('class', 'zlines').attr('x1', xb(z + 4*s)).attr('y1', 40).attr('x2', xb(z + 4*s)).attr('y2', 80).attr('stroke', 'darkgrey').attr('stroke-width', 2);
-      svgTopAxis.append('line').attr('class', 'zlines').attr('x1', xb(z + 5*s)).attr('y1', 40).attr('x2', xb(z + 5*s)).attr('y2', 80).attr('stroke', 'darkgrey').attr('stroke-width', 2);
-
+        svgTopAxis.append('line').attr('class', 'zlines').attr('x1', xb(z + 1*s)).attr('y1', 40).attr('x2', xb(z + 1*s)).attr('y2', 80).attr('stroke', 'darkgrey').attr('stroke-width', 1);
+        svgTopAxis.append('line').attr('class', 'zlines').attr('x1', xb(z + 2*s)).attr('y1', 40).attr('x2', xb(z + 2*s)).attr('y2', 80).attr('stroke', 'darkgrey').attr('stroke-width', 1);
+        svgTopAxis.append('line').attr('class', 'zlines').attr('x1', xb(z + 3*s)).attr('y1', 40).attr('x2', xb(z + 3*s)).attr('y2', 80).attr('stroke', 'darkgrey').attr('stroke-width', 1);
+        svgTopAxis.append('line').attr('class', 'zlines').attr('x1', xb(z + 4*s)).attr('y1', 40).attr('x2', xb(z + 4*s)).attr('y2', 80).attr('stroke', 'darkgrey').attr('stroke-width', 1);
+        svgTopAxis.append('line').attr('class', 'zlines').attr('x1', xb(z + 5*s)).attr('y1', 40).attr('x2', xb(z + 5*s)).attr('y2', 80).attr('stroke', 'darkgrey').attr('stroke-width', 1);
+      }
     }
     else {
       d3.selectAll('.zlines').remove();
     }
-  })
+  }
 
+  function removemuline() {
+    d3.selectAll('.muline').remove();
+  }
+
+  function removezlines() {
+    d3.selectAll('.zlines').remove();
+  }
 
   /*----------------------------------------------pdf slider-------------------------------------*/
 
@@ -752,6 +917,34 @@ $(function() {
     setTopAxis();   
   }
 
+  /*-----------------------------Panel 2 t-----------------------------------------*/
+
+  $z.on('change', function() {
+    z = true;
+    t = false;
+    zandt = false;
+    drawTPDF();
+    drawCriticalValueLines();
+  })
+
+  $t.on('change', function() {
+    z = false;
+    t = true;
+    zandt = false;
+    drawTPDF();
+    drawCriticalValueLines()
+  })
+
+  $zandt.on('change', function() {
+    z = false;
+    t = false;
+    zandt = true;
+    drawTPDF();
+    drawCriticalValueLines()
+  })
+
+
+  /*-----------------------------df------------------------------------------------*/
   //changes to the dfcheckboxes
   $df.on('change', function() {
     df = parseFloat($df.val());
@@ -777,6 +970,19 @@ $(function() {
  
   }
   
+  /*---------------------------------------------Panel 2 Mean and z or t lines----------------------------*/
+
+  $tshowmuline.on('change', function() {
+    tshowmuline = $tshowmuline.prop('checked');
+    drawmuline();
+  })
+
+  $tshowtzline.on('change', function() {
+    tshowtzline = $tshowtzline.prop('checked');
+    drawzlines();
+  })
+
+
   /*---------------------------------------------Tooltips on or off-------------------------------------- */
 
   function setTooltips() {

@@ -1,13 +1,14 @@
 <!--
 Program       esci-disributions.html 
 Author        Gordon Moore
-Date          25 July 2020
+Date          21 July 2020
 Description   A JavaScript implementation of esci distributions for Introduction to the New Statistics by Geoff Cumming and Robert Calin-Jageman
 Licence       GNU General Public LIcence Version 3, 29 June 2007
 -->
 <!-- #region version history-->
 <!--
 0.0.1       Initial version
+0.1.0       2020-07-25  The first version released
 
 
 -->
@@ -104,26 +105,23 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
                     <div><input type=radio id=notails  name=tails value=notails checked><label id=labelfornotails  for=notails  data-tooltip>No tails</label></div>
                     <div>
                       <input type=radio    id=onetail  name=tails value=onetail><label id=labelforonetail  for=onetail  data-tooltip>One tail</label>
-                      <input type=checkbox id=showarea name=showarea value=showarea><label id=labelforareas for=showareas data-tooltip>Areas</label>
+                      <input type=checkbox id=showarea name=showarea value=showarea><label id=labelforareas for=showarea data-tooltip>Areas</label>
                     </div>
                     <div><input type=radio id=twotails name=tails value=twotails><label id=labelfortwotails for=twotails data-tooltip>Two tails</label></div>
                   </div>
                 </div>
 
                 <div id=lines>
-                  <span></span><span class=red>2 </span>Lines </span>
+                  <span><span class=red>2 </span>Lines </span>
                   <div id=muzline>
                     <input type=checkbox id=showmuline><label id=labelformuline for=showmuline data-tooltip>Mean line</label>
                     <input type=checkbox id=showzline> <label id=labelforzline  for=showzline  data-tooltip>z lines</label>
                   </div>  
-                  <div>
-
-                  </div>
 
                 </div>
 
                 <div id=musigma>
-                  <span></span><span class=red>3 </span>X variable </span>
+                  <span><span class=red>3 </span>X variable </span>
 
                   <div id=Xselectdiv>
                     <div id=showxaxisdiv><input type=checkbox id=showxaxis><label id=labelforxaxis for=showxaxis data-tooltip>Display X axis</label></div>
@@ -152,19 +150,46 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
             <!-- Student t Distribution -->
             <div id="tab-2" class="tab-pane" role="tabpane1">
 
-                <div id=df>
-                  <span></span><span class=red>4 </span>Degrees of freedom </span>
-                  <div id=dfblock>
+              <div id=ztselect>
+                <span><span class=red>4 </span>Curves </span>
 
+                <div><input type=radio id=z     name=ztdist  checked><label id=labelforz  for=z  data-tooltip><em>z</em></label></div>
+                <div><input type=radio id=t     name=ztdist ><label id=labelfort  for=t  data-tooltip><em>t</em></label></div>
+                <div><input type=radio id=zandt name=ztdist ><label id=labelforzandt for=twotails data-tooltip><em>z</em> and <em>t</em></label></div>
+                
+                <div id=df>
+                  </span>Degrees of freedom </span>
+                  <div id=dfblock>
                     <div id=dfdiv>df</div>    
                     <input id=dfslider      class=musigmaslider type=text value=0 />
                     <img id=dfnudgebackward class="iconsmusigma slidericons" src=./images/left.png alt='nudge backwards'>
                     <img id=dfnudgeforward  class="iconsmusigma slidericons" src=./images/right.png alt='nudge forward'> 
                     <input id=dfval type=text>
-                
-                </div>
-
+                  </div>
+               </div>
               </div>
+
+              <div id=ttailspanel>
+                <span><span class=red>5 </span>Tails </span>
+
+                <div id=ttails>
+                  <div><input type=radio id=tnotails  name=ttails checked><label id=labelfortnotails  for=tnotails>No tails</label></div>
+                  <div>
+                    <input type=radio    id=tonetail  name=ttails >  <label id=labelfortonetail  for=tonetail  >One tail</label>
+                    <input type=checkbox id=tshowarea name=tshowarea ><label id=labelfortareas for=tshowarea >Areas</label>
+                  </div>
+                  <div><input type=radio id=ttwotails name=ttails >  <label id=labelforttwotails for=ttwotails >Two tails</label></div>
+                </div>
+              </div>
+
+              <div id=tlines>
+                <span><span class=red>6 </span>Lines </span>
+                <div id=tmuzline>
+                  <input type=checkbox id=tshowmuline><label id=labelfortmuline for=showtmuline >Mean line</label>
+                  <input type=checkbox id=tshowtzline><label id=labelfortzlines  for=showtzlines ><em>z</em> or <em>t </em>lines</label>
+                </div>  
+              </div>
+
 
             </div>
 
