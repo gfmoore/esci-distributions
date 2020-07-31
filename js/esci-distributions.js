@@ -14,11 +14,12 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 0.1.2         2020-07-31  #3 Remove leading zeros
 0.1.3         2020-07-31  Allow links to local libraries rather than cdn to allow portability
 0.1.4         2020-07-31  #9 Bottom footer link text changed to match with dances
+0.1.5         2020-07-31  #4 Extend "cursors" to X axis.
 
 */
 //#endregion 
 
-let version = '0.1.4';
+let version = '0.1.5';
 
 'use strict';
 $(function() {
@@ -645,19 +646,25 @@ $(function() {
 
         //now draw the critical lines
         if (tab === 'Normal') {
-          svgP.append('line').attr('class', 'criticalvalueline').attr('x1', xb(zfrom)).attr('y1', y(0)).attr('x2', xb(zfrom)).attr('y2', y(dfrom)).attr('stroke', 'black').attr('stroke-width', 2);
-          svgP.append('line').attr('class', 'criticalvalueline').attr('x1', xb(zto)).attr('y1', y(0)).attr('x2', xb(zto)).attr('y2', y(dto)).attr('stroke', 'black').attr('stroke-width', 2);
+          svgP.append('line').attr('class', 'criticalvalueline').attr('x1', xb(zfrom)).attr('y1', y(0)).attr('x2', xb(zfrom)).attr('y2', y(realHeight /*dfrom*/)).attr('stroke', 'black').attr('stroke-width', 2);
+          //and in X axis
+          svgTopAxis.append('line').attr('class', 'criticalvalueline').attr('x1', xb(zfrom)).attr('y1', 40).attr('x2', xb(zfrom)).attr('y2', 80).attr('stroke', 'black').attr('stroke-width', 2);
+
+          svgP.append('line').attr('class', 'criticalvalueline').attr('x1', xb(zto)).attr('y1', y(0)).attr('x2', xb(zto)).attr('y2', y(realHeight /*dto*/)).attr('stroke', 'black').attr('stroke-width', 2);
+          //and in X axis
+          svgTopAxis.append('line').attr('class', 'criticalvalueline').attr('x1', xb(zto)).attr('y1', 40).attr('x2', xb(zto)).attr('y2', 80).attr('stroke', 'black').attr('stroke-width', 2);
+
         }
 
         //student-t tab
         if (tab === 'Studentt') {
           if (z) {
-            svgP.append('line').attr('class', 'criticalvalueline').attr('x1', xb(zfrom)).attr('y1', y(0)).attr('x2', xb(zfrom)).attr('y2', y(dfrom)).attr('stroke', 'blue').attr('stroke-width', 2);
-            svgP.append('line').attr('class', 'criticalvalueline').attr('x1', xb(zto)).attr('y1', y(0)).attr('x2', xb(zto)).attr('y2', y(dto)).attr('stroke', 'blue').attr('stroke-width', 2);
+            svgP.append('line').attr('class', 'criticalvalueline').attr('x1', xb(zfrom)).attr('y1', y(0)).attr('x2', xb(zfrom)).attr('y2', y(realHeight /*dfrom*/)).attr('stroke', 'blue').attr('stroke-width', 2);
+            svgP.append('line').attr('class', 'criticalvalueline').attr('x1', xb(zto)).attr('y1', y(0)).attr('x2', xb(zto)).attr('y2', y(realHeight /*dto*/)).attr('stroke', 'blue').attr('stroke-width', 2);
           }
           if (t || zandt) {
-            svgP.append('line').attr('class', 'criticalvalueline').attr('x1', xb(zfrom)).attr('y1', y(0)).attr('x2', xb(zfrom)).attr('y2', y(dtfrom)).attr('stroke', 'red').attr('stroke-width', 2);
-            svgP.append('line').attr('class', 'criticalvalueline').attr('x1', xb(zto)).attr('y1', y(0)).attr('x2', xb(zto)).attr('y2', y(dtto)).attr('stroke', 'red').attr('stroke-width', 2);
+            svgP.append('line').attr('class', 'criticalvalueline').attr('x1', xb(zfrom)).attr('y1', y(0)).attr('x2', xb(zfrom)).attr('y2', y(realHeight /*dtfrom*/)).attr('stroke', 'red').attr('stroke-width', 2);
+            svgP.append('line').attr('class', 'criticalvalueline').attr('x1', xb(zto)).attr('y1', y(0)).attr('x2', xb(zto)).attr('y2', y(realHeight /*dtto*/)).attr('stroke', 'red').attr('stroke-width', 2);
           }
         }
 
@@ -665,6 +672,14 @@ $(function() {
         if (tab === 'Normal') drawNormalPDF();
         if (tab === 'Studentt') drawTPDF();
 
+        if (tab === 'Normal') {
+          drawmuline();
+          drawzlines()
+        }
+        if (tab === 'Studentt') {
+          drawmuline();
+          drawzlines();
+        }
 
         //Areas - Now display some values
         if (showarea) {
@@ -724,19 +739,14 @@ $(function() {
       }
     }
 
-    if (tab === 'Normal') {
-      drawmuline();
-      drawzlines()
-    }
-    if (tab === 'Studentt') {
-      drawmuline();
-      drawzlines();
-    }
+
 
   }
 
   function removeCriticalTails() {
     svgP.selectAll('.criticalvalueline').remove();
+    svgTopAxis.selectAll('.criticalvalueline').remove();
+
     svgP.selectAll('.criticalregionlefttail').remove();
     svgP.selectAll('.criticalregionrighttail').remove();
     svgP.selectAll('.probability').remove();

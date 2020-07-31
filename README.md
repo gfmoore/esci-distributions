@@ -10,7 +10,7 @@ https://thenewstatistics.com/
 
 ![Introduction to the New Statistics](images/ITNS-the-cover-2-Feb-16.png?raw=true "Introduction to the New Statistics")
 
-## Current version 0.1.4
+## Current version 0.1.5
 
 You can see which version by hovering on the logo.
 
