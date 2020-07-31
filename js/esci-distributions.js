@@ -11,10 +11,11 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 0.0.1         Initial version
 0.1.0         2020-07-25 The first version
 0.1.1         2020-07-31  #2 Italics for Roman variable names
+0.1.2         2020-07-31  #3 Remove leading zeros
 */
 //#endregion 
 
-let version = '0.1.1';
+let version = '0.1.2';
 
 'use strict';
 $(function() {
@@ -669,14 +670,14 @@ $(function() {
             pfromgt = 1 - pfromlt;                       //prob from slider less than   
             ptolt   = jStat.normal.cdf(zto, zmu, zsd);   //prob to slider less than
             ptogt   = 1 - ptolt;                         //prob to slider greater than
-            mid;
 
-            pfromlt = pfromlt.toFixed(4);
-            pfromgt = pfromgt.toFixed(4);
-            ptolt   = ptolt.toFixed(4);
-            ptogt   = ptogt.toFixed(4);
+            mid = Math.abs((1 - ptolt - pfromgt));
 
-            mid = Math.abs((1 - ptolt - pfromgt)).toFixed(4); 
+            pfromlt = pfromlt.toFixed(4).toString().replace('0.', '.');
+            pfromgt = pfromgt.toFixed(4).toString().replace('0.', '.');
+            ptolt   = ptolt.toFixed(4).toString().replace('0.', '.');
+            ptogt   = ptogt.toFixed(4).toString().replace('0.', '.');
+            mid     = mid.toFixed(4).toString().replace('0.', '.');
 
             //add a background rectangle to get background colour for text
             svgP.append('rect').attr('class', 'probability').attr('x',xb(zfrom) - 75 ).attr('y', rheight - 50).attr('width', 70).attr('height', 27).attr('fill', 'white').attr('stroke', 'black').attr('stroke-width', 1);
