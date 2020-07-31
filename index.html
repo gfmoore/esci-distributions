@@ -9,6 +9,7 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 <!--
 0.0.1       Initial version
 0.1.0       2020-07-25  The first version released
+0.1.1       2020-07-31  #2 Italics for Roman variable names
 
 
 -->
@@ -88,7 +89,7 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
               <a class="nav-link" href="#tab-1">Normal Distribution</a>
             </li>
             <li>
-              <a class="nav-link" href="#tab-2">Student t Distribution</a>
+              <a class="nav-link" href="#tab-2">Student <em>t</em> Distribution</a>
             </li>
           </ul>
        
@@ -98,6 +99,7 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
               <!-- Normal Distribution -->
               <div id=normalpanel>
 
+<!-------------------------------------1 Tails----------------------------------------->                
                 <div id=tailspanel>
                   <span><span class=red>1 </span>Tails </span>
 
@@ -111,20 +113,24 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
                   </div>
                 </div>
 
+<!-------------------------------------2 Lines----------------------------------------->                
+
                 <div id=lines>
                   <span><span class=red>2 </span>Lines </span>
                   <div id=muzline>
                     <input type=checkbox id=showmuline><label id=labelformuline for=showmuline data-tooltip>Mean line</label>
-                    <input type=checkbox id=showzline> <label id=labelforzline  for=showzline  data-tooltip>z lines</label>
+                    <input type=checkbox id=showzline> <label id=labelforzline  for=showzline  data-tooltip><em>z</em> lines</label>
                   </div>  
 
                 </div>
 
+<!-------------------------------------3 X Variable----------------------------------------->                
+
                 <div id=musigma>
-                  <span><span class=red>3 </span>X variable </span>
+                  <span><span class=red>3 </span><em>X</em> variable </span>
 
                   <div id=Xselectdiv>
-                    <div id=showxaxisdiv><input type=checkbox id=showxaxis><label id=labelforxaxis for=showxaxis data-tooltip>Display X axis</label></div>
+                    <div id=showxaxisdiv><input type=checkbox id=showxaxis><label id=labelforxaxis for=showxaxis data-tooltip>Display <em>X</em> axis</label></div>
                     <div id=unitsdiv><span id=unitsspan>Units: </span><input id=units type=text></div>
                   </div>
 
@@ -150,6 +156,8 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
             <!-- Student t Distribution -->
             <div id="tab-2" class="tab-pane" role="tabpane1">
 
+<!-------------------------------------4 Curves----------------------------------------->                
+
               <div id=ztselect>
                 <span><span class=red>4 </span>Curves </span>
 
@@ -160,7 +168,7 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
                 <div id=df>
                   </span>Degrees of freedom </span>
                   <div id=dfblock>
-                    <div id=dfdiv>df</div>    
+                    <div id=dfdiv><em>df</em></div>    
                     <input id=dfslider      class=musigmaslider type=text value=0 />
                     <img id=dfnudgebackward class="iconsmusigma slidericons" src=./images/left.png alt='nudge backwards'>
                     <img id=dfnudgeforward  class="iconsmusigma slidericons" src=./images/right.png alt='nudge forward'> 
@@ -168,6 +176,8 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
                   </div>
                </div>
               </div>
+
+<!-------------------------------------5 Tails----------------------------------------->                
 
               <div id=ttailspanel>
                 <span><span class=red>5 </span>Tails </span>
@@ -181,6 +191,8 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
                   <div><input type=radio id=ttwotails name=ttails >  <label id=labelforttwotails for=ttwotails >Two tails</label></div>
                 </div>
               </div>
+
+<!-------------------------------------6 Lines----------------------------------------->                
 
               <div id=tlines>
                 <span><span class=red>6 </span>Lines </span>

@@ -10,10 +10,11 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 /*
 0.0.1         Initial version
 0.1.0         2020-07-25 The first version
+0.1.1         2020-07-31  #2 Italics for Roman variable names
 */
 //#endregion 
 
-let version = '0.1.0';
+let version = '0.1.1';
 
 'use strict';
 $(function() {
