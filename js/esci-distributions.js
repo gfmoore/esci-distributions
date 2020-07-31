@@ -13,10 +13,12 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 0.1.1         2020-07-31  #2 Italics for Roman variable names
 0.1.2         2020-07-31  #3 Remove leading zeros
 0.1.3         2020-07-31  Allow links to local libraries rather than cdn to allow portability
+0.1.4         2020-07-31  #9 Bottom footer link text changed to match with dances
+
 */
 //#endregion 
 
-let version = '0.1.3';
+let version = '0.1.4';
 
 'use strict';
 $(function() {
