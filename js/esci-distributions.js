@@ -12,10 +12,11 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 0.1.0         2020-07-25 The first version
 0.1.1         2020-07-31  #2 Italics for Roman variable names
 0.1.2         2020-07-31  #3 Remove leading zeros
+0.1.3         2020-07-31  Allow links to local libraries rather than cdn to allow portability
 */
 //#endregion 
 
-let version = '0.1.2';
+let version = '0.1.3';
 
 'use strict';
 $(function() {
