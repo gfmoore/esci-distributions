@@ -19,12 +19,13 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 0.1.7   2020-08-01  #6 two tail sum of tails probability displayed
 0.1.8   2020-08-01  #14 clear on tab change + tidy up code + #6 refix two tail sum + not allow area if no tails
 0.1.9   2020-08-01  #8 Centre probability box between two critical lines + Adjusted key caption position for z and t
-0.1.10  2020-08-01  #7 Draw X values on critical lines                    
+0.1.10  2020-08-01  #7 Draw X values on critical lines     
+0.1.11  2020-08-01  #10 Automatic nudge on mousedown               
 
 */
 //#endregion 
 
-let version = '0.1.10';
+let version = '0.1.11';
 
 'use strict';
 $(function() {
@@ -148,21 +149,9 @@ $(function() {
     });
   });
 
+  let repeatId;
+
   //#endregion
-
-
-  //#region TESTING
-  // $notails.prop('checked', false);
-  // notails = false;
-  // $onetail.prop('checked', false);
-  // onetail = false;
-  // $twotails.prop('checked', true);
-  // twotails = true;
-
-  // $showarea.prop('checked', true);
-  // showarea = true;
-  //#endregion
-
 
   initialise();
 
@@ -290,7 +279,7 @@ $(function() {
       max: 5.000,
       from: -5.000,
       to: 5.000,
-      step: 0.005,
+      step: 0.001,
       grid: true,
       grid_num: 10,
       prettify: prettify,
@@ -468,11 +457,23 @@ $(function() {
     if (tab === 'Normal')   drawNormalPDF();
     if (tab === 'Studentt') drawTPDF();
     
-    drawCriticalTails();
+    //#region TESTING -------------------------------------------------------------------
+    $notails.prop('checked', false);
+    notails = false;
+    $onetail.prop('checked', true);
+    onetail = true;
+    // $twotails.prop('checked', true);
+    // twotails = true;
 
+    // $showarea.prop('checked', true);
+    // showarea = true;
+    //#endregion
+
+    drawCriticalTails();
   }
 
   /*-------------------------------------------Set up axes---------------------------------------------*/
+
 
   function setupAxes() {
     //the height is 0 - 100 in real world coords   I'm not sure resize is working for rheight
@@ -923,28 +924,71 @@ $(function() {
     drawCriticalTails();
   }
 
+  let delay = 50;
+
   $leftnudgebackward.on('click', function(e) {
-    if (zfrom > -5) zfrom -= 0.005;
+    if (zfrom > -5) zfrom -= 0.001;
     if (twotails) zto = -zfrom;
     zsliderUpdate();
   })
+
+  $leftnudgebackward.on('mousedown', function() {
+    repeatId = setInterval ( "$('#leftnudgebackward').trigger( 'click' );", delay );
+  })
+
+  $leftnudgebackward.on('mouseup', function() {
+    clearInterval(repeatId)
+  })
+
+
 
   $leftnudgeforward.on('click', function(e) {
-    if (zfrom < 5) zfrom += 0.005;
-    if (twotails) zto = -zfrom;
-    zsliderUpdate();
+    //while ( $leftnudgeforward.length ) {
+      if (zfrom < 5) zfrom += 0.001;
+      if (twotails) zto = -zfrom;
+      zsliderUpdate();
+    //}
   })
+
+  $leftnudgeforward.on('mousedown', function() {
+    repeatId = setInterval ( "$('#leftnudgeforward').trigger( 'click' );", delay );
+  })
+
+  $leftnudgeforward.on('mouseup', function() {
+    clearInterval(repeatId)
+  })
+
+
 
   $rightnudgebackward.on('click', function(e) {
-    if (zto > -5) zto -= 0.005;
+    if (zto > -5) zto -= 0.001;
     if (twotails) zfrom = -zto;
     zsliderUpdate();
   })
 
+  $rightnudgebackward.on('mousedown', function() {
+    repeatId = setInterval ( "$('#rightnudgebackward').trigger( 'click' );", delay );
+  })
+
+  $rightnudgebackward.on('mouseup', function() {
+    clearInterval(repeatId)
+  })
+
+
+
   $rightnudgeforward.on('click', function(e) {
-    if (zto < 5) zto += 0.005;
+    if (zto < 5) zto += 0.001;
     if (twotails) zfrom = -zto;
     zsliderUpdate();
+  })
+
+  $rightnudgeforward.on('mousedown', function() {
+    mdown = true;
+    repeatId = setInterval ( "$('#rightnudgeforward').trigger( 'click' );", delay );
+  })
+
+  $rightnudgeforward.on('mouseup', function() {
+    clearInterval(repeatId)
   })
 
   /*---------------------------------------mu lines   zlines  x-axis   units-----------------------------------------------*/
@@ -1050,10 +1094,26 @@ $(function() {
     updateMu();
   })
 
+  $munudgebackward.on('mousedown', function() {
+    repeatId = setInterval ( "$('#munudgebackward').trigger( 'click' );", delay );
+  })
+
+  $munudgebackward.on('mouseup', function() {
+    clearInterval(repeatId)
+  })
+
   $munudgeforward.on('click', function() {
     mu += 1;
     $mu.val(mu);
     updateMu();
+  })
+
+  $munudgeforward.on('mousedown', function() {
+    repeatId = setInterval ( "$('#munudgeforward').trigger( 'click' );", delay );
+  })
+
+  $munudgeforward.on('mouseup', function() {
+    clearInterval(repeatId)
   })
 
   function updateMu() {
@@ -1063,6 +1123,8 @@ $(function() {
     setTopAxis();  
     drawCriticalTails(); 
   }
+
+
 
   $sigma.on('change', function() {
     sigma = parseFloat($sigma.val());
@@ -1075,10 +1137,26 @@ $(function() {
     updateSigma();
   })
 
+  $sigmanudgebackward.on('mousedown', function() {
+    repeatId = setInterval ( "$('#sigmanudgebackward').trigger( 'click' );", delay );
+  })
+
+  $sigmanudgebackward.on('mouseup', function() {
+    clearInterval(repeatId)
+  })
+
   $sigmanudgeforward.on('click', function() {
     sigma += 1;
     $sigma.val(sigma);
     updateSigma();
+  })
+
+  $sigmanudgeforward.on('mousedown', function() {
+    repeatId = setInterval ( "$('#sigmanudgeforward').trigger( 'click' );", delay );
+  })
+
+  $sigmanudgeforward.on('mouseup', function() {
+    clearInterval(repeatId)
   })
 
   function updateSigma() {
@@ -1125,9 +1203,18 @@ $(function() {
 
   $dfnudgebackward.on('click', function() {
     df -= 1;
+    if (df < 1) df = 1;
     $df.val(df);
     updateDF();
   })
+
+  $dfnudgebackward.on('mousedown', function() {
+    repeatId = setInterval ( "$('#dfnudgebackward').trigger( 'click' );", delay );
+  })
+
+  $dfnudgebackward.on('mouseup', function() {
+    clearInterval(repeatId)
+  })  
 
   $dfnudgeforward.on('click', function() {
     df += 1;
@@ -1135,6 +1222,14 @@ $(function() {
     updateDF();
   })
 
+  $dfnudgeforward.on('mousedown', function() {
+    repeatId = setInterval ( "$('#dfnudgeforward').trigger( 'click' );", delay );
+  })
+
+  $dfnudgeforward.on('mouseup', function() {
+    clearInterval(repeatId)
+  })
+  
   function updateDF() {
     $dfslider.update({
       from: df
