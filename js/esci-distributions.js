@@ -8,20 +8,20 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 
 // #region Version history
 /*
-0.0.1         Initial version
-0.1.0         2020-07-25 The first version
-0.1.1         2020-07-31  #2 Italics for Roman variable names
-0.1.2         2020-07-31  #3 Remove leading zeros
-0.1.3         2020-07-31  Allow links to local libraries rather than cdn to allow portability
-0.1.4         2020-07-31  #9 Bottom footer link text changed to match with dances
-0.1.5         2020-07-31  #4 Extend "cursors" to X axis.
-0.1.6         2020-08-01  #3 no leading zeros on t, #5 tick marks on axes, fix vertical rescale bug
-
+0.0.1   Initial version
+0.1.0   2020-07-25 The first version
+0.1.1   2020-07-31  #2 Italics for Roman variable names
+0.1.2   2020-07-31  #3 Remove leading zeros
+0.1.3   2020-07-31  Allow links to local libraries rather than cdn to allow portability
+0.1.4   2020-07-31  #9 Bottom footer link text changed to match with dances
+0.1.5   2020-07-31  #4 Extend "cursors" to X axis.
+0.1.6   2020-08-01  #3 no leading zeros on t, #5 tick marks on axes, fix vertical rescale bug
+0.1.7   2020-08-01  #6 two tail sum of tails probability displayed
 
 */
 //#endregion 
 
-let version = '0.1.6';
+let version = '0.1.7';
 
 'use strict';
 $(function() {
@@ -78,6 +78,7 @@ $(function() {
   let ptolt;
   let ptogt;
   let mid;
+  let twotailtotal;
 
   const $showarea  = $('#showarea');
   let showarea     = false;
@@ -160,40 +161,9 @@ $(function() {
 
   initialise();
 
-  //change tabs
-  $("#smarttab").on("showTab", function(e, anchorObject, tabIndex) {
-    if (tabIndex === 0) tab = 'Normal';
-    if (tabIndex === 1) tab = 'Studentt';
-
-    removemuline();
-    removezlines();
-
-    if (tab === 'Normal') {   
-      removeCriticalTails();
-      removeTPDF();
-
-      setupDisplay();
-
-      drawNormalPDF();
-
-      if (showmuline) drawmuline();
-      if (showzline) drawzlines();
-
-    }
-    if (tab === 'Studentt') {   //Student t
-      removeCriticalTails();
-      removeNormalPDF();
-
-      setupDisplay();
-
-      drawTPDF();
-
-      if (tshowmuline) drawmuline();
-      if (tshowtzline) drawzlines();
-    }
-  });
 
   function initialise() {
+    
     //tabs
     $('#smarttab').smartTab({
       selected: 0, // Initial selected tab, 0 = first tab
@@ -219,6 +189,9 @@ $(function() {
           keyRight: [39] // Right key code
       }
     });
+
+    //goto Normal tab
+    $('#smarttab').smartTab("goToTab", 0);
     
     //initialvalues - pick these up from textboxes/sliders or dropdowns
     mu     = 100;
@@ -390,9 +363,42 @@ $(function() {
     heightP = rheight - margin.top - margin.bottom;
 
     clear();
-
   }
 
+  //change tabs
+  $("#smarttab").on("showTab", function(e, anchorObject, tabIndex) {
+    if (tabIndex === 0) tab = 'Normal';
+    if (tabIndex === 1) tab = 'Studentt';
+
+    removemuline();
+    removezlines();
+    removeCriticalTails();
+
+    if (tab === 'Normal') {   
+
+      removeTPDF();
+
+      setupDisplay();
+
+      drawNormalPDF();
+
+      if (showmuline) drawmuline();
+      if (showzline) drawzlines();
+
+    }
+    if (tab === 'Studentt') {   //Student t
+
+      removeNormalPDF();
+
+      setupDisplay();
+
+      drawTPDF();
+
+      if (tshowmuline) drawmuline();
+      if (tshowtzline) drawzlines();
+    }
+  });
+  
   function clear() {
     setupDisplay();
 
@@ -650,7 +656,7 @@ $(function() {
   /*-----------------------------------draw the critical value areas and values-------------------------*/
   function drawCriticalValueLines() {
 
-    removeCriticalTails()
+    removeCriticalTails();
 
     if (!notails) {
 
@@ -736,37 +742,47 @@ $(function() {
             ptogt   = 1 - ptolt;                         //prob to slider greater than
 
             mid = Math.abs((1 - ptolt - pfromgt));
+            twotailtotal = pfromlt + ptogt;
 
             pfromlt = pfromlt.toFixed(4).toString().replace('0.', '.');
             pfromgt = pfromgt.toFixed(4).toString().replace('0.', '.');
             ptolt   = ptolt.toFixed(4).toString().replace('0.', '.');
             ptogt   = ptogt.toFixed(4).toString().replace('0.', '.');
             mid     = mid.toFixed(4).toString().replace('0.', '.');
+            twotailtotal = twotailtotal.toFixed(4).toString().replace('0.', '.');
 
             //add a background rectangle to get background colour for text
             svgP.append('rect').attr('class', 'probability').attr('x',xb(zfrom) - 75 ).attr('y', rheight - 50).attr('width', 70).attr('height', 27).attr('fill', 'white').attr('stroke', 'black').attr('stroke-width', 1);
             svgP.append('text').text(pfromlt).attr('class', 'probability').attr('x', xb(zfrom) - 70).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
 
-            svgP.append('rect').attr('class', 'probability').attr('x', width/2 - 6 ).attr('y', rheight - 100).attr('width', 70).attr('height', 27).attr('fill', 'lemonchiffon').attr('stroke', 'black').attr('stroke-width', 1);
-            svgP.append('text').text(mid).attr('class',   'probability').attr('x', width/2 - 0).attr('y', rheight - 80).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+            svgP.append('rect').attr('class', 'probability').attr('x', width/2 - 6 ).attr('y', rheight - 80).attr('width', 70).attr('height', 27).attr('fill', 'lemonchiffon').attr('stroke', 'black').attr('stroke-width', 1);
+            svgP.append('text').text(mid).attr('class',   'probability').attr('x', width/2 - 0).attr('y', rheight - 60).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
 
             svgP.append('rect').attr('class', 'probability').attr('x',xb(zto) + 5 ).attr('y', rheight - 50).attr('width', 70).attr('height', 27).attr('fill', 'white').attr('stroke', 'black').attr('stroke-width', 1);
             svgP.append('text').text(ptogt).attr('class',   'probability').attr('x', xb(zto) + 15).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+
+            if (twotails) {
+              svgP.append('text').text('two tails').attr('class',   'probability').attr('x', xb(zto) + 7).attr('y', rheight - 120).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+              svgP.append('rect').attr('class', 'probability').attr('x',xb(zto) + 5 ).attr('y', rheight - 110).attr('width', 70).attr('height', 27).attr('fill', 'honeydew').attr('stroke', 'black').attr('stroke-width', 1);
+              svgP.append('text').text(twotailtotal).attr('class',   'probability').attr('x', xb(zto) + 15).attr('y', rheight - 90).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+            }
           }
 
           if (tab === 'Studentt' && (t || zandt)) {
-            let pfromlt = jStat.studentt.cdf(zfrom, df); //prob from slider less than
-            let pfromgt = 1 - pfromlt;                       //prob from slider less than   
-            let ptolt   = jStat.studentt.cdf(zto, df);   //prob to slider less than
-            let ptogt   = 1 - ptolt;                         //prob to slider greater than
-            let mid = Math.abs((1 - ptolt - pfromgt));
+            pfromlt = jStat.studentt.cdf(zfrom, df); //prob from slider less than
+            pfromgt = 1 - pfromlt;                       //prob from slider less than   
+            ptolt   = jStat.studentt.cdf(zto, df);   //prob to slider less than
+            ptogt   = 1 - ptolt;                         //prob to slider greater than
+            mid = Math.abs((1 - ptolt - pfromgt));
+            twotailtotal = pfromlt+ ptogt;
+
 
             pfromlt = pfromlt.toFixed(4).toString().replace('0.', '.');
             pfromgt = pfromgt.toFixed(4).toString().replace('0.', '.');
             ptolt   = ptolt.toFixed(4).toString().replace('0.', '.');
             ptogt   = ptogt.toFixed(4).toString().replace('0.', '.');
             mid     = mid.toFixed(4).toString().replace('0.', '.');
-             
+            twotailtotal = twotailtotal.toFixed(4).toString().replace('0.', '.'); 
 
             //add a background rectangle to get background colour for text
             svgP.append('rect').attr('class', 'probability').attr('x',xb(zfrom) - 75 ).attr('y', rheight - 50).attr('width', 70).attr('height', 27).attr('fill', 'white').attr('stroke', 'black').attr('stroke-width', 1);
@@ -777,6 +793,12 @@ $(function() {
 
             svgP.append('rect').attr('class', 'probability').attr('x',xb(zto) + 5 ).attr('y', rheight - 50).attr('width', 70).attr('height', 27).attr('fill', 'white').attr('stroke', 'black').attr('stroke-width', 1);
             svgP.append('text').text(ptogt).attr('class',   'probability').attr('x', xb(zto) + 15).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+
+            if (twotails) {
+              svgP.append('text').text('two tails').attr('class',   'probability').attr('x', xb(zto) + 7).attr('y', rheight - 120).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+              svgP.append('rect').attr('class', 'probability').attr('x',xb(zto) + 5 ).attr('y', rheight - 110).attr('width', 70).attr('height', 27).attr('fill', 'honeydew').attr('stroke', 'black').attr('stroke-width', 1);
+              svgP.append('text').text(twotailtotal).attr('class',   'probability').attr('x', xb(zto) + 15).attr('y', rheight - 90).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+            }
 
           }
 
