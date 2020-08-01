@@ -20,12 +20,13 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 0.1.8   2020-08-01  #14 clear on tab change + tidy up code + #6 refix two tail sum + not allow area if no tails
 0.1.9   2020-08-01  #8 Centre probability box between two critical lines + Adjusted key caption position for z and t
 0.1.10  2020-08-01  #7 Draw X values on critical lines     
-0.1.11  2020-08-01  #10 Automatic nudge on mousedown               
+0.1.11  2020-08-01  #10 Automatic nudge on mousedown 
+0.1.12  2020-08-01  #11 DF slider and textbox fixes              
 
 */
 //#endregion 
 
-let version = '0.1.11';
+let version = '0.1.12';
 
 'use strict';
 $(function() {
@@ -257,7 +258,7 @@ $(function() {
       skin: 'big',
       type: 'single',
       min: 1,
-      max: 50,
+      max: 100,
       from: df,
       step: 1,
       grid: true,
@@ -1198,6 +1199,13 @@ $(function() {
   //changes to the dfcheckboxes
   $df.on('change', function() {
     df = parseFloat($df.val());
+    if (df < 1) {
+      df = 1;
+    }
+    if (df > 100) {
+      df = 100
+    }
+    $df.val(df);
     updateDF();
   })
 
@@ -1218,6 +1226,7 @@ $(function() {
 
   $dfnudgeforward.on('click', function() {
     df += 1;
+    if (df > 100) df = 100;
     $df.val(df);
     updateDF();
   })
@@ -1234,7 +1243,9 @@ $(function() {
     $dfslider.update({
       from: df
     })
- 
+    createT();
+    drawTPDF();
+    drawCriticalTails();
   }
   
   /*---------------------------------------------Panel 2 Mean and z or t lines----------------------------*/
