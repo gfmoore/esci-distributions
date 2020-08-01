@@ -257,7 +257,7 @@ $(function() {
     $('#dfslider').ionRangeSlider({
       skin: 'big',
       type: 'single',
-      min: 1,
+      min: 0,
       max: 100,
       from: df,
       step: 1,
@@ -266,6 +266,10 @@ $(function() {
       //on slider handles change
       onChange: function (data) {
         df = data.from;
+        if (df < 1) {
+          df = 1;
+          $dfslider.update({ from: df });
+        }
         $df.val(df);
         createT();
         drawTPDF();
@@ -331,6 +335,7 @@ $(function() {
     $mu.val(mu);
     $sigma.val(sigma);
 
+    $dfslider.update({ from: df });
     $df.val(df);
 
     zfrom = -5.000;
@@ -442,6 +447,7 @@ $(function() {
     zfrom = -5;
     zto = 5;
     $zslider.update( { from: zfrom, to: zto } );
+
 
     removemuline();
     removezlines();
