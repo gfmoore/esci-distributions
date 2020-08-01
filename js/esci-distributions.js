@@ -19,12 +19,12 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 0.1.7   2020-08-01  #6 two tail sum of tails probability displayed
 0.1.8   2020-08-01  #14 clear on tab change + tidy up code + #6 refix two tail sum + not allow area if no tails
 0.1.9   2020-08-01  #8 Centre probability box between two critical lines + Adjusted key caption position for z and t
-                    
+0.1.10  2020-08-01  #7 Draw X values on critical lines                    
 
 */
 //#endregion 
 
-let version = '0.1.9';
+let version = '0.1.10';
 
 'use strict';
 $(function() {
@@ -242,6 +242,7 @@ $(function() {
         mu = data.from;
         $mu.val(mu);
         setTopAxis();
+        drawCriticalTails();
       }
     })
 
@@ -259,6 +260,7 @@ $(function() {
         sigma = data.from;
         $sigma.val(sigma);
         setTopAxis();
+        drawCriticalTails();
       }
     })
 
@@ -501,7 +503,7 @@ $(function() {
       svgTopAxis.append('g').attr('class', 'topaxis').style("font", "1.8rem sans-serif").attr( 'transform', 'translate(0, 40)' ).call(xAxisA);
 
       //add some text labels
-      svgTopAxis.append('text').text('X').style('font-weight', 'italic').attr('class', 'topaxistext').attr('x', width/2 - 20).attr('y', 20).attr('text-anchor', 'start').attr('fill', 'black');
+      svgTopAxis.append('text').text('X').style('font-style', 'italic').attr('class', 'topaxistext').attr('x', width/2 - 20).attr('y', 20).attr('text-anchor', 'start').attr('fill', 'black');
       svgTopAxis.append('text').text(units).attr('class', 'topaxisunits').attr('x', width/2 - 70).attr('y', 70).attr('text-anchor', 'start').attr('fill', 'black');
 
       //add additional ticks
@@ -714,6 +716,10 @@ $(function() {
  
   function drawCriticalTails() {
 
+    //get the X values
+    let leftX, rightX;
+
+
     removeCriticalTails();
 
     if (!notails) {
@@ -757,13 +763,29 @@ $(function() {
         //now draw the critical lines
         if (tab === 'Normal') {
           svgP.append('line').attr('class', 'criticalvalueline').attr('x1', xb(zfrom)).attr('y1', y(0)).attr('x2', xb(zfrom)).attr('y2', y(realHeight /*dfrom*/)).attr('stroke', 'black').attr('stroke-width', 2);
-          //and in X axis
+          //and extend to X axis
           svgTopAxis.append('line').attr('class', 'criticalvalueline').attr('x1', xb(zfrom)).attr('y1', 40).attr('x2', xb(zfrom)).attr('y2', 80).attr('stroke', 'black').attr('stroke-width', 2);
 
+          //label of left X value
+          if (showxaxis) {
+            leftX = (mu + zfrom*sigma).toFixed(1);
+            //create a white borderless rectangle behind so as to cut out that part of the critical line
+            svgP.append('rect').attr('class', 'criticalvalueline').attr('x', xb(zfrom) - 30 ).attr('y', 0).attr('width', 80).attr('height', 20).attr('fill', 'white').attr('stroke', 'none').attr('stroke-width', 1);
+            svgP.append('text').text('X=').attr('class', 'criticalvalueline').attr('x', xb(zfrom) - 25).attr('y', 15).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").style('font-style', 'italic').attr('fill', 'black');
+            svgP.append('text').text(leftX).attr('class', 'criticalvalueline').attr('x', xb(zfrom) + 5).attr('y', 15).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+          }
+
           svgP.append('line').attr('class', 'criticalvalueline').attr('x1', xb(zto)).attr('y1', y(0)).attr('x2', xb(zto)).attr('y2', y(realHeight /*dto*/)).attr('stroke', 'black').attr('stroke-width', 2);
-          //and in X axis
+          //and extend to X axis
           svgTopAxis.append('line').attr('class', 'criticalvalueline').attr('x1', xb(zto)).attr('y1', 40).attr('x2', xb(zto)).attr('y2', 80).attr('stroke', 'black').attr('stroke-width', 2);
 
+          //label of right  X value
+          if (showxaxis) {
+            rightX = (mu + zto*sigma).toFixed(1);
+            svgP.append('rect').attr('class', 'criticalvalueline').attr('x', xb(zto) - 30 ).attr('y', 0).attr('width', 80).attr('height', 20).attr('fill', 'white').attr('stroke', 'none').attr('stroke-width', 1);
+            if (showxaxis) svgP.append('text').text('X=').attr('class', 'criticalvalueline').attr('x', xb(zto) - 25).attr('y', 15).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").style('font-style', 'italic').attr('fill', 'black');
+            if (showxaxis) svgP.append('text').text(rightX).attr('class', 'criticalvalueline').attr('x', xb(zto) + 5).attr('y', 15).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+          }
         }
 
         //student-t tab
@@ -947,7 +969,6 @@ $(function() {
         if (tab === 'Normal') svgTopAxis.append('line').attr('class', 'zlines').attr('x1', xb(0)+1).attr('y1', 40).attr('x2', xb(0)+1).attr('y2', 80).attr('stroke', 'darkgrey').attr('stroke-width', 2);
       }
     }
-
   }
 
   function removemuline() {
@@ -1007,6 +1028,7 @@ $(function() {
   $showxaxis.on('change', function() {
     showxaxis = $showxaxis.prop('checked');
     setTopAxis(); //turns it on or off
+    drawCriticalTails();
   })
 
   $units.on('change', function() {
@@ -1038,7 +1060,8 @@ $(function() {
     $muslider.update({
       from: mu
     })
-    setTopAxis();   
+    setTopAxis();  
+    drawCriticalTails(); 
   }
 
   $sigma.on('change', function() {
@@ -1062,7 +1085,8 @@ $(function() {
     $sigmaslider.update({
       from: sigma
     })
-    setTopAxis();   
+    setTopAxis(); 
+    drawCriticalTails();  
   }
 
   /*-----------------------------Panel 2 t-----------------------------------------*/
