@@ -17,61 +17,105 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 0.1.5   2020-07-31  #4 Extend "cursors" to X axis.
 0.1.6   2020-08-01  #3 no leading zeros on t, #5 tick marks on axes, fix vertical rescale bug
 0.1.7   2020-08-01  #6 two tail sum of tails probability displayed
+0.1.8   2020-08-01  #14 clear on tab change + tidy up code + #6 refix two tail sum + not allow area if no tails
 
 */
 //#endregion 
 
-let version = '0.1.7';
+let version = '0.1.8';
 
 'use strict';
 $(function() {
   console.log('jQuery here!');  //just to make sure everything is working
 
-  let tab = 'Normal';                                       //what tab?
-
   //#region for variable definitions (just allows code folding)
-  let tooltipson = false;                                   //toggle the tooltips on or off
+  let tooltipson              = false;                                        //toggle the tooltips on or off
 
-  const pdfdisplay = document.querySelector('#pdfdisplay'); //display of pdf area
+  let tab                     = 'Normal';                                     //what tab?
 
+  const pdfdisplay            = document.querySelector('#pdfdisplay');        //display of pdf area
 
-  let realHeight = 100;                                     //the real world height for the pdf display area
-  let margin = {top: 0, right: 10, bottom: 0, left: 70};    //margins for pdf display area
-
-
-  let width;
-  let height;                                               //the true width of the pdf display area in pixels
+  let realHeight              = 100;                                          //the real world height for the pdf display area
+  let margin                  = {top: 0, right: 10, bottom: 0, left: 70};     //margins for pdf display area
+  let width;                                                                  //the true width of the pdf display area in pixels
   let heightP;   
+  let rwidth;                                                                 //the width returned by resize
+  let rheight;                                                                //the height returned by resize
+  let xt, xb, y;                                                              //scale functions
+
+  let svgTopAxis;                                                             //svg reference to the top axis
+  let svgBottomAxis;                                                          //svg reference to the bottom axis
+  let svgP;                                                                   //the svg reference to pdfdisplay
+
+
+  let mu                      = 100;
+  let sigma                   = 15;                                          //the population mean, standard deviation and degrees of freedom
+  let zmu                     = 0;                                           //parameters of normal distribution
+  let zsd                     = 1;                                           
+  let df                      = 10;                                          //degrees of freedom
+
+  const $mu                   = $('#muval');
+  const $sigma                = $('#sigmaval');
+  const $df                   = $('#dfval');
+
+  //normal tails
+  const $notails              = $('#notails');
+  const $onetail              = $('#onetail');
+  const $twotails             = $('#twotails');
+
+  let notails                 = true;
+  let onetail                 = false;
+  let twotails                = false;  
+
+  const $showarea             = $('#showarea');
+  let showarea                = false;
   
-  let rwidth;                                               //the width returned by resize
-  let rheight;                                              //the height returned by resize
+  //student t tails
+  const $tnotails             = $('#tnotails');
+  const $tonetail             = $('#tonetail');
+  const $ttwotails            = $('#ttwotails');
 
-  let xt, xb, y;                                            //scale functions
+  //use notails, onetail and twotails for same functionality
+  let tnotails;
+  let tonetail;  
+  let ttwotails;
 
-  let svgTopAxis;                                           //svg reference to the top axis
-  let svgBottomAxis;                                        //svg reference to the bottom axis
-  let svgP;                                                 //the svg reference to pdfdisplay
+  const $tshowarea            = $('#tshowarea');
+  let tshowarea;
 
-  let mu, sigma;                                            //the population mean, standard deviation and degrees of freedom
-  let zmu, zsd;                                             //parameters of normal distribution
+  const $showxaxis            = $('#showxaxis');
+  let showxaxis               = false;
 
-  let df;                                                   //degrees of freedom
+  const $units                = $('#units');
+  let units                   = 'IQ Points';
+  $units.val(units);
 
-  let normalpdf = [];                                       //the array holding the normal distribution
-  let tpdf = [];                                            //the array holding the student t distribution
-  let functionHeight;                                       //get max height of pdf function
+  const $showmuline           = $('#showmuline');
+  let showmuline              = false;
+  const $showzline            = $('#showzline');
+  let showzline               = false;
+
+  const $tshowmuline          = $('#tshowmuline');
+  let tshowmuline             = false;
+  const $tshowtzline          = $('#tshowtzline');
+  let tshowtzline             = false;
+
+  const $z                    = $('#z');
+  let   z                     = true;
+  const $t                    = $('#t');
+  let   t                     = false;
+  const $zandt                = $('#zandt');
+  let   zandt                 = false;
+
+
+  let normalpdf               = [];                                           //the array holding the normal distribution
+  let tpdf                    = [];                                           //the array holding the student t distribution
+  let functionHeight;                                                         //get max height of pdf function
   let tfunctionHeight;
-  let dfrom, dto;                                           //frequency density (height) on pdf
-  let dtfrom, dtto;                                         //frequency density for t
-  let $zslider;                                             //reference to slider
-  let zfrom, zto;                                           //the current from to values on the slider
-  let oldzfrom, oldzto;                                     //remember old (previous) values to determine whcih slider changed
-
-  //cache jquery properties (faster)
-  $mu    = $('#muval');
-  $sigma = $('#sigmaval');
-
-  $df    = $('#dfval');
+                  
+  let $zslider;                                                               //reference to slider
+  let zfrom, zto;                                                             //the current from to values on the slider
+  let oldzfrom, oldzto;                                                       //remember old (previous) values to determine whcih slider changed
 
   let pfromlt;
   let pfromgt;
@@ -80,59 +124,18 @@ $(function() {
   let mid;
   let twotailtotal;
 
-  const $showarea  = $('#showarea');
-  let showarea     = false;
-  const $notails   = $('#notails');
-  let notails      = true;
-  const $onetail   = $('#onetail');
-  let onetail      = false;
-  const $twotails  = $('#twotails');
-  let twotails     = false;
+  const $leftnudgebackward    = $('#leftnudgebackward')
+  const $leftnudgeforward     = $('#leftnudgeforward');
+  const $rightnudgebackward   = $('#rightnudgebackward')
+  const $rightnudgeforward    = $('#rightnudgeforward');
 
-  const $showmuline = $('#showmuline');
-  let showmuline    = false;
-  const $showzline  = $('#showzline');
-  let showzline     = false;
+  const $munudgebackward      = $('#munudgebackward'); 
+  const $munudgeforward       = $('#munudgeforward'); 
+  const $sigmanudgebackward   = $('#sigmanudgebackward'); 
+  const $sigmanudgeforward    = $('#sigmanudgeforward'); 
 
-  const $showxaxis  = $('#showxaxis');
-  let showxaxis     = false;
-
-  const $units      = $('#units');
-  let units         = 'IQ Points';
-  $units.val(units);
-
-  const $z      = $('#z');
-  let   z       = true;
-  const $t      = $('#t');
-  let   t       = false;
-  const $zandt  = $('#zandt');
-  let   zandt   = false;
-
-  //student t tails
-  const $tshowarea  = $('#tshowarea');
-  const $tnotails   = $('#tnotails');
-  const $tonetail   = $('#tonetail');
-  const $ttwotails  = $('#ttwotails');
-  //vars already defined and reused
-
-
-  $tshowmuline      = $('#tshowmuline');
-  tshowmuline       = false;
-  $tshowtzline     = $('#tshowtzline');
-  tshowtzline      = false;
-
-  const $leftnudgebackward  = $('#leftnudgebackward')
-  const $leftnudgeforward   = $('#leftnudgeforward');
-  const $rightnudgebackward = $('#rightnudgebackward')
-  const $rightnudgeforward  = $('#rightnudgeforward');
-
-  const $munudgebackward    = $('#munudgebackward'); 
-  const $munudgeforward     = $('#munudgeforward'); 
-  const $sigmanudgebackward = $('#sigmanudgebackward'); 
-  const $sigmanudgeforward  = $('#sigmanudgeforward'); 
-
-  const $dfnudgebackward    = $('#dfnudgebackward'); 
-  const $dfnudgeforward     = $('#dfnudgeforward'); 
+  const $dfnudgebackward      = $('#dfnudgebackward'); 
+  const $dfnudgeforward       = $('#dfnudgeforward'); 
 
   //api for getting width, height of element - only gets element, not entire DOM
   // https://www.digitalocean.com/community/tutorials/js-resize-observer
@@ -160,7 +163,6 @@ $(function() {
 
 
   initialise();
-
 
   function initialise() {
     
@@ -193,13 +195,6 @@ $(function() {
     //goto Normal tab
     $('#smarttab').smartTab("goToTab", 0);
     
-    //initialvalues - pick these up from textboxes/sliders or dropdowns
-    mu     = 100;
-    sigma  = 15;
-
-    zmu    = 0;
-    zsd    = 1;
-    df     = 10;
 
     setupSliders()
 
@@ -280,7 +275,7 @@ $(function() {
         $df.val(df);
         createT();
         drawTPDF();
-        drawCriticalValueLines();
+        drawCriticalTails();
       }
     })
 
@@ -310,7 +305,7 @@ $(function() {
             zfrom = -zto;
           } 
         }
-        drawCriticalValueLines();
+        drawCriticalTails();
         //setSliders(); //it just doesn't work here. slider is too slow to respond I think
       },
 
@@ -353,16 +348,32 @@ $(function() {
   }
 
   function resize() {
-    //have to watch out as the width and height do not always seem presice to pixels
+    //have to watch out as the width and height do not always seem precise to pixels
     //browsers apparently do not expose true element width, height.
     //also have to think about box model. outerwidth(true) gets full width, not sure resizeObserver does.
-
     resizeObserver.observe(pdfdisplay);  //note doesn't get true outer width, height
 
     width   = rwidth - margin.left - margin.right;  
     heightP = rheight - margin.top - margin.bottom;
 
-    clear();
+    //clear(); - clear removes too much
+    removemuline();
+    removezlines();
+    removeCriticalTails();
+
+    removeNormalPDF();  //not sure I need to do this as draNormal does it as well?
+    removeTPDF();
+
+    setupAxes();
+    //if (showxaxis)  setTopAxis();  //setupAxes should do this
+
+    if (tab === 'Normal')   drawNormalPDF();
+    if (tab === 'Studentt') drawTPDF();
+    
+    if (showmuline) drawmuline();
+    if (showzline)  drawzlines();
+
+    drawCriticalTails();
   }
 
   //change tabs
@@ -370,54 +381,96 @@ $(function() {
     if (tabIndex === 0) tab = 'Normal';
     if (tabIndex === 1) tab = 'Studentt';
 
+    clear();
+  });
+
+  //set evrything to a default state.
+  function clear() {
+    
+    //tab Normal
+    $notails.prop('checked', true);
+    notails = true;
+    $onetail.prop('checked', false);
+    onetail = false;
+    $twotails.prop('checked', false);
+    twotails = false;
+
+    $showarea.prop('checked', false);
+    showarea = false;
+
+    $showmuline.prop('checked', false);
+    showmuline = false;
+    $showzline.prop('checked', false);
+    showzline = false;
+
+    $showxaxis.prop('checked', false);
+    showxaxis = false
+
+    mu     = 100;
+    $muslider.update({ from: mu });
+    $mu.val(mu);
+
+    sigma  = 15;
+    $sigmaslider.update({ from: sigma });
+    $sigma.val(sigma);
+
+
+    //tab Student t
+    $z.prop('checked', true);
+    z = true;
+    $t.prop('checked', false);
+    t = false;
+    $zandt.prop('checked', false);
+    zandt = false;
+
+    df = 10;
+    $dfslider.update({ from: df });
+    $df.val(df);
+
+
+    $tshowmuline.prop('checked', false);
+    tshowmuline = false;
+    $tshowtzline.prop('checked', false);
+    tshowtzline = false;
+
+    $tnotails.prop('checked', true);
+    notails = true;
+    $tonetail.prop('checked', false);
+    onetail = false;
+    $ttwotails.prop('checked', false);
+    twotails = false;
+
+    $tshowarea.prop('checked', false);
+    tshowarea = false;
+
+
+    //now default the display
+    zfrom = -5;
+    zto = 5;
+    $zslider.update( { from: zfrom, to: zto } );
+
     removemuline();
     removezlines();
     removeCriticalTails();
 
-    if (tab === 'Normal') {   
-
-      removeTPDF();
-
-      setupDisplay();
-
-      drawNormalPDF();
-
-      if (showmuline) drawmuline();
-      if (showzline) drawzlines();
-
-    }
-    if (tab === 'Studentt') {   //Student t
-
-      removeNormalPDF();
-
-      setupDisplay();
-
-      drawTPDF();
-
-      if (tshowmuline) drawmuline();
-      if (tshowtzline) drawzlines();
-    }
-  });
-  
-  function clear() {
-    setupDisplay();
-
-    removeNormalPDF();
+    removeNormalPDF();  //not sure I need to do this as draNormal does it as well?
     removeTPDF();
+
+    setupAxes();  //removes and resets axes
 
     createNormal();
     createT();
 
-    removeCriticalTails();
-
-    if (tab === 'Normal') drawNormalPDF();
+    if (tab === 'Normal')   drawNormalPDF();
     if (tab === 'Studentt') drawTPDF();
     
-    drawCriticalValueLines();
+    drawCriticalTails();
 
   }
 
-  function setupDisplay() {
+  /*-------------------------------------------Set up axes---------------------------------------------*/
+
+  function setupAxes() {
     //the height is 0 - 100 in real world coords   I'm not sure resize is working for rheight
     heightP = $('#pdfdisplay').outerHeight(true) - margin.top - margin.bottom;
     y = d3.scaleLinear().domain([0, realHeight]).range([heightP, 0]);
@@ -513,6 +566,8 @@ $(function() {
 
   }
 
+  /*------------------------------------do distributions------------------------------------*/
+
   function createNormal() {
     normalpdf = [];
 
@@ -521,15 +576,13 @@ $(function() {
     }
 
     //scale it to fit in with drawing area
-    //functionHeight = d3.max(normalpdf, function(d) { return d.y});
     normalpdf.forEach(function(v) {
       v.y = scaleypdf(v.y);
     })
- 
   }
 
   function scaleypdf(y) {
-     return y * 250;
+    return y * 250;
   }
 
   function drawNormalPDF() {
@@ -548,15 +601,6 @@ $(function() {
     d3.selectAll('.normalpdf').remove();
   }
 
-  function showNormalPDF() {
-    d3.selectAll('.normalpdf').show();
-  }
-
-  function hideNormalPDF() {
-    d3.selectAll('.normalpdf').hide();
-  }
-
-  
   function createT() {
     createNormal();  //just in case not done so
 
@@ -574,7 +618,6 @@ $(function() {
   }
 
   function tscaleypdf(y) {
-    //return y * realHeight / tfunctionHeight * 0.9 + 0.2;
     return y * 250;
   }
 
@@ -606,55 +649,68 @@ $(function() {
     d3.selectAll('.tpdf').remove();
   }
 
-  function showTPDF() {
-    d3.selectAll('.tpdf').show();
-  }
-
-  function hideTPDF() {
-    d3.selectAll('.tpdf').hide();
-  }
 
   /*-------------------------------------tails control---------------------------------------*/
 
-  $showarea.on('change', function() {
-    showarea = $showarea.prop('checked');
-    drawCriticalValueLines();
-  })
 
   $("input[name='tails']").change(function() {
     notails  = $notails.prop('checked');
     onetail  = $onetail.prop('checked');
     twotails = $twotails.prop('checked'); 
+    if (notails) {
+      $showarea.prop('checked', false);
+      showarea = false;
+    }
     if (twotails) {
       zfrom = -zto; //had to choose one side
       zoldfrom = zfrom
       zoldto = zto;
       $zslider.update( { from: zfrom, to: zto })
     }
-    drawCriticalValueLines();   
+    drawCriticalTails();   
   })
 
-  $tshowarea.on('change', function() {
-    showarea = $tshowarea.prop('checked');
-    drawCriticalValueLines();
+  $showarea.on('change', function() {
+    showarea = $showarea.prop('checked');
+    if (notails) {
+      $showarea.prop('checked', false);
+      showarea = false;
+    }
+    
+    drawCriticalTails();
   })
 
   $("input[name='ttails']").change(function() {
     notails  = $tnotails.prop('checked');
     onetail  = $tonetail.prop('checked');
     twotails = $ttwotails.prop('checked'); 
+    if (notails) {
+      $tshowarea.prop('checked', false);
+      showarea = false;
+    }
     if (twotails) {
       zfrom = -zto; //had to choose one side
       zoldfrom = zfrom
       zoldto = zto;
       $zslider.update( { from: zfrom, to: zto })
     }
-    drawCriticalValueLines();   
+    drawCriticalTails();   
+  })
+
+  $tshowarea.on('change', function() {
+    showarea = $tshowarea.prop('checked');
+    if (notails) {
+      $tshowarea.prop('checked', false);
+      showarea = false;
+    }
+
+    drawCriticalTails();
   })
 
 
   /*-----------------------------------draw the critical value areas and values-------------------------*/
-  function drawCriticalValueLines() {
+ 
+  function drawCriticalTails() {
 
     removeCriticalTails();
 
@@ -742,31 +798,32 @@ $(function() {
             ptogt   = 1 - ptolt;                         //prob to slider greater than
 
             mid = Math.abs((1 - ptolt - pfromgt));
-
+            
+            //twotailtotal = pfromlt + ptogt  //sum of displayed probabilities
 
             pfromlt = pfromlt.toFixed(4).toString().replace('0.', '.');
             pfromgt = pfromgt.toFixed(4).toString().replace('0.', '.');
             ptolt   = ptolt.toFixed(4).toString().replace('0.', '.');
             ptogt   = ptogt.toFixed(4).toString().replace('0.', '.');
             mid     = mid.toFixed(4).toString().replace('0.', '.');
-
-            twotailtotal = pfromlt + ptogt;  //sum of displayed probabilities
+            
+            twotailtotal = parseFloat(ptogt) * 2;
             twotailtotal = twotailtotal.toFixed(4).toString().replace('0.', '.');
 
             //add a background rectangle to get background colour for text
-            svgP.append('rect').attr('class', 'probability').attr('x',xb(zfrom) - 75 ).attr('y', rheight - 50).attr('width', 70).attr('height', 27).attr('fill', 'white').attr('stroke', 'black').attr('stroke-width', 1);
-            svgP.append('text').text(pfromlt).attr('class', 'probability').attr('x', xb(zfrom) - 70).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+            svgP.append('rect').attr('class', 'probability').attr('x',xb(zfrom) - 62 ).attr('y', rheight - 50).attr('width', 58).attr('height', 27).attr('fill', 'white').attr('stroke', 'black').attr('stroke-width', 1);
+            svgP.append('text').text(pfromlt).attr('class', 'probability').attr('x', xb(zfrom) - 58).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
 
-            svgP.append('rect').attr('class', 'probability').attr('x', width/2 - 6 ).attr('y', rheight - 80).attr('width', 70).attr('height', 27).attr('fill', 'lemonchiffon').attr('stroke', 'black').attr('stroke-width', 1);
-            svgP.append('text').text(mid).attr('class',   'probability').attr('x', width/2 - 0).attr('y', rheight - 60).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+            svgP.append('rect').attr('class', 'probability').attr('x', width/2 + 2 ).attr('y', rheight - 80).attr('width', 68).attr('height', 27).attr('fill', 'lemonchiffon').attr('stroke', 'black').attr('stroke-width', 1);
+            svgP.append('text').text(mid).attr('class',   'probability').attr('x', width/2 + 5).attr('y', rheight - 60).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
 
-            svgP.append('rect').attr('class', 'probability').attr('x',xb(zto) + 5 ).attr('y', rheight - 50).attr('width', 70).attr('height', 27).attr('fill', 'white').attr('stroke', 'black').attr('stroke-width', 1);
-            svgP.append('text').text(ptogt).attr('class',   'probability').attr('x', xb(zto) + 15).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+            svgP.append('rect').attr('class', 'probability').attr('x',xb(zto) + 5 ).attr('y', rheight - 50).attr('width', 58).attr('height', 27).attr('fill', 'white').attr('stroke', 'black').attr('stroke-width', 1);
+            svgP.append('text').text(ptogt).attr('class',   'probability').attr('x', xb(zto) + 10).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
 
             if (twotails) {
               svgP.append('text').text('two tails').attr('class',   'probability').attr('x', xb(zto) + 7).attr('y', rheight - 120).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
-              svgP.append('rect').attr('class', 'probability').attr('x',xb(zto) + 5 ).attr('y', rheight - 110).attr('width', 70).attr('height', 27).attr('fill', 'honeydew').attr('stroke', 'black').attr('stroke-width', 1);
-              svgP.append('text').text(twotailtotal).attr('class',   'probability').attr('x', xb(zto) + 15).attr('y', rheight - 90).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+              svgP.append('rect').attr('class', 'probability').attr('x',xb(zto) + 5 ).attr('y', rheight - 110).attr('width', 58).attr('height', 27).attr('fill', 'honeydew').attr('stroke', 'black').attr('stroke-width', 1);
+              svgP.append('text').text(twotailtotal).attr('class',   'probability').attr('x', xb(zto) + 10).attr('y', rheight - 90).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
             }
           }
 
@@ -776,6 +833,8 @@ $(function() {
             ptolt   = jStat.studentt.cdf(zto, df);   //prob to slider less than
             ptogt   = 1 - ptolt;                         //prob to slider greater than
             mid = Math.abs((1 - ptolt - pfromgt));
+            
+            //twotailtotal = pfromlt + ptogt //sum of displayed probabilities
 
             pfromlt = pfromlt.toFixed(4).toString().replace('0.', '.');
             pfromgt = pfromgt.toFixed(4).toString().replace('0.', '.');
@@ -783,22 +842,22 @@ $(function() {
             ptogt   = ptogt.toFixed(4).toString().replace('0.', '.');
             mid     = mid.toFixed(4).toString().replace('0.', '.');
 
-            twotailtotal = pfromlt + ptogt;  //sum of displayed probabilities
+            twotailtotal = parseFloat(ptogt) * 2;
             twotailtotal = twotailtotal.toFixed(4).toString().replace('0.', '.'); 
 
             //add a background rectangle to get background colour for text
-            svgP.append('rect').attr('class', 'probability').attr('x',xb(zfrom) - 75 ).attr('y', rheight - 50).attr('width', 70).attr('height', 27).attr('fill', 'white').attr('stroke', 'black').attr('stroke-width', 1);
-            svgP.append('text').text(pfromlt).attr('class', 'probability').attr('x', xb(zfrom) - 70).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+            svgP.append('rect').attr('class', 'probability').attr('x',xb(zfrom) - 62 ).attr('y', rheight - 50).attr('width', 58).attr('height', 27).attr('fill', 'white').attr('stroke', 'black').attr('stroke-width', 1);
+            svgP.append('text').text(pfromlt).attr('class', 'probability').attr('x', xb(zfrom) - 58).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
 
-            svgP.append('rect').attr('class', 'probability').attr('x', width/2 - 6 ).attr('y', rheight - 100).attr('width', 70).attr('height', 27).attr('fill', 'lemonchiffon').attr('stroke', 'black').attr('stroke-width', 1);
-            svgP.append('text').text(mid).attr('class',   'probability').attr('x', width/2 - 0).attr('y', rheight - 80).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+            svgP.append('rect').attr('class', 'probability').attr('x', width/2 + 2 ).attr('y', rheight - 100).attr('width', 68).attr('height', 27).attr('fill', 'lemonchiffon').attr('stroke', 'black').attr('stroke-width', 1);
+            svgP.append('text').text(mid).attr('class',   'probability').attr('x', width/2 + 5).attr('y', rheight - 80).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
 
-            svgP.append('rect').attr('class', 'probability').attr('x',xb(zto) + 5 ).attr('y', rheight - 50).attr('width', 70).attr('height', 27).attr('fill', 'white').attr('stroke', 'black').attr('stroke-width', 1);
-            svgP.append('text').text(ptogt).attr('class',   'probability').attr('x', xb(zto) + 15).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+            svgP.append('rect').attr('class', 'probability').attr('x',xb(zto) + 5 ).attr('y', rheight - 50).attr('width', 58).attr('height', 27).attr('fill', 'white').attr('stroke', 'black').attr('stroke-width', 1);
+            svgP.append('text').text(ptogt).attr('class',   'probability').attr('x', xb(zto) + 10).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
 
             if (twotails) {
               svgP.append('text').text('two tails').attr('class',   'probability').attr('x', xb(zto) + 7).attr('y', rheight - 120).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
-              svgP.append('rect').attr('class', 'probability').attr('x',xb(zto) + 5 ).attr('y', rheight - 110).attr('width', 70).attr('height', 27).attr('fill', 'honeydew').attr('stroke', 'black').attr('stroke-width', 1);
+              svgP.append('rect').attr('class', 'probability').attr('x',xb(zto) + 5 ).attr('y', rheight - 110).attr('width', 58).attr('height', 27).attr('fill', 'honeydew').attr('stroke', 'black').attr('stroke-width', 1);
               svgP.append('text').text(twotailtotal).attr('class',   'probability').attr('x', xb(zto) + 15).attr('y', rheight - 90).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
             }
 
@@ -822,25 +881,44 @@ $(function() {
     svgP.selectAll('.probability').remove();
   }
 
-  //not used on resize
-  function resetCriticalTails() {
-    $zslider.update( {
-      from: -5,
-      to: 5
-    })
+  /*----------------------------------------------Slider panel-------------------------------------*/
+
+  function zsliderUpdate() {
+    zoldfrom = zfrom;
+    zoldto = zto;
+    $zslider.update( { from: zfrom, to: zto })
+    drawCriticalTails();
   }
 
+  $leftnudgebackward.on('click', function(e) {
+    if (zfrom > -5) zfrom -= 0.005;
+    if (twotails) zto = -zfrom;
+    zsliderUpdate();
+  })
 
-  /*---------------------------------------lines-----------------------------------------------*/
+  $leftnudgeforward.on('click', function(e) {
+    if (zfrom < 5) zfrom += 0.005;
+    if (twotails) zto = -zfrom;
+    zsliderUpdate();
+  })
+
+  $rightnudgebackward.on('click', function(e) {
+    if (zto > -5) zto -= 0.005;
+    if (twotails) zfrom = -zto;
+    zsliderUpdate();
+  })
+
+  $rightnudgeforward.on('click', function(e) {
+    if (zto < 5) zto += 0.005;
+    if (twotails) zfrom = -zto;
+    zsliderUpdate();
+  })
+
+  /*---------------------------------------mu lines   zlines  x-axis   units-----------------------------------------------*/
 
   $showmuline.on('change', function() {
     showmuline = $showmuline.prop('checked');
     drawmuline();
-  })
-
-  $showzline.on('change', function() {
-    showzline = $showzline.prop('checked');
-    drawzlines();
   })
 
   function drawmuline() {
@@ -860,6 +938,16 @@ $(function() {
     }
 
   }
+
+  function removemuline() {
+    d3.selectAll('.muline').remove();
+  }
+
+
+  $showzline.on('change', function() {
+    showzline = $showzline.prop('checked');
+    drawzlines();
+  })
 
   function drawzlines() {
     if (showzline || tshowtzline) {
@@ -901,15 +989,9 @@ $(function() {
     }
   }
 
-  function removemuline() {
-    d3.selectAll('.muline').remove();
-  }
-
   function removezlines() {
     d3.selectAll('.zlines').remove();
   }
-
-  /*----------------------------------------------pdf slider-------------------------------------*/
 
   $showxaxis.on('change', function() {
     showxaxis = $showxaxis.prop('checked');
@@ -921,36 +1003,6 @@ $(function() {
     setTopAxis();
   })
 
-  $leftnudgebackward.on('click', function(e) {
-    if (zfrom > -5) zfrom -= 0.005;
-    if (twotails) zto = -zfrom;
-    zsliderUpdate();
-  })
-
-  $leftnudgeforward.on('click', function(e) {
-    if (zfrom < 5) zfrom += 0.005;
-    if (twotails) zto = -zfrom;
-    zsliderUpdate();
-  })
-
-  $rightnudgebackward.on('click', function(e) {
-    if (zto > -5) zto -= 0.005;
-    if (twotails) zfrom = -zto;
-    zsliderUpdate();
-  })
-
-  $rightnudgeforward.on('click', function(e) {
-    if (zto < 5) zto += 0.005;
-    if (twotails) zfrom = -zto;
-    zsliderUpdate();
-  })
-
-  function zsliderUpdate() {
-    zoldfrom = zfrom;
-    zoldto = zto;
-    $zslider.update( { from: zfrom, to: zto })
-    drawCriticalValueLines();
-  }
 
   /*-----------------------------------------mu sigma --------------------------------------*/
   //changes to the mu, sigma checkboxes
@@ -1009,7 +1061,7 @@ $(function() {
     t = false;
     zandt = false;
     drawTPDF();
-    drawCriticalValueLines();
+    drawCriticalTails();
   })
 
   $t.on('change', function() {
@@ -1017,7 +1069,7 @@ $(function() {
     t = true;
     zandt = false;
     drawTPDF();
-    drawCriticalValueLines()
+    drawCriticalTails()
   })
 
   $zandt.on('change', function() {
@@ -1025,7 +1077,7 @@ $(function() {
     t = false;
     zandt = true;
     drawTPDF();
-    drawCriticalValueLines()
+    drawCriticalTails()
   })
 
 
