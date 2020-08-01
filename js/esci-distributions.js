@@ -742,13 +742,15 @@ $(function() {
             ptogt   = 1 - ptolt;                         //prob to slider greater than
 
             mid = Math.abs((1 - ptolt - pfromgt));
-            twotailtotal = pfromlt + ptogt;
+
 
             pfromlt = pfromlt.toFixed(4).toString().replace('0.', '.');
             pfromgt = pfromgt.toFixed(4).toString().replace('0.', '.');
             ptolt   = ptolt.toFixed(4).toString().replace('0.', '.');
             ptogt   = ptogt.toFixed(4).toString().replace('0.', '.');
             mid     = mid.toFixed(4).toString().replace('0.', '.');
+
+            twotailtotal = pfromlt + ptogt;  //sum of displayed probabilities
             twotailtotal = twotailtotal.toFixed(4).toString().replace('0.', '.');
 
             //add a background rectangle to get background colour for text
@@ -774,14 +776,14 @@ $(function() {
             ptolt   = jStat.studentt.cdf(zto, df);   //prob to slider less than
             ptogt   = 1 - ptolt;                         //prob to slider greater than
             mid = Math.abs((1 - ptolt - pfromgt));
-            twotailtotal = pfromlt+ ptogt;
-
 
             pfromlt = pfromlt.toFixed(4).toString().replace('0.', '.');
             pfromgt = pfromgt.toFixed(4).toString().replace('0.', '.');
             ptolt   = ptolt.toFixed(4).toString().replace('0.', '.');
             ptogt   = ptogt.toFixed(4).toString().replace('0.', '.');
             mid     = mid.toFixed(4).toString().replace('0.', '.');
+
+            twotailtotal = pfromlt + ptogt;  //sum of displayed probabilities
             twotailtotal = twotailtotal.toFixed(4).toString().replace('0.', '.'); 
 
             //add a background rectangle to get background colour for text
