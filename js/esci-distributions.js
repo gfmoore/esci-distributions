@@ -15,11 +15,13 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 0.1.3         2020-07-31  Allow links to local libraries rather than cdn to allow portability
 0.1.4         2020-07-31  #9 Bottom footer link text changed to match with dances
 0.1.5         2020-07-31  #4 Extend "cursors" to X axis.
+0.1.6         2020-08-01  #3 no leading zeros on t, #5 tick marks on axes, fix vertical rescale bug
+
 
 */
 //#endregion 
 
-let version = '0.1.5';
+let version = '0.1.6';
 
 'use strict';
 $(function() {
@@ -141,7 +143,6 @@ $(function() {
   });
 
   //#endregion
-
 
 
   //#region TESTING
@@ -395,13 +396,14 @@ $(function() {
   function clear() {
     setupDisplay();
 
+    removeNormalPDF();
+    removeTPDF();
+
     createNormal();
     createT();
 
     removeCriticalTails();
-    //resetCriticalTails();
-    removeNormalPDF();
-    removeTPDF();
+
     if (tab === 'Normal') drawNormalPDF();
     if (tab === 'Studentt') drawTPDF();
     
@@ -410,7 +412,8 @@ $(function() {
   }
 
   function setupDisplay() {
-    //the height is 0 - 100 in real world coords
+    //the height is 0 - 100 in real world coords   I'm not sure resize is working for rheight
+    heightP = $('#pdfdisplay').outerHeight(true) - margin.top - margin.bottom;
     y = d3.scaleLinear().domain([0, realHeight]).range([heightP, 0]);
 
     setTopAxis();
@@ -420,6 +423,7 @@ $(function() {
   function setTopAxis() {
     //clear axes
     d3.selectAll('.topaxis').remove();
+    d3.selectAll('.topaxisminorticks').remove();
     d3.selectAll('.topaxistext').remove();
     d3.selectAll('.topaxisunits').remove();
 
@@ -432,12 +436,33 @@ $(function() {
       xt = d3.scaleLinear().domain([left, right]).range([margin.left-2, width+4]);
 
       //top horizontal axis
-      let xAxisA = d3.axisTop(xt);
+      let xAxisA = d3.axisTop(xt).tickSizeOuter(0);  //tickSizeOuter gets rid of the start and end ticks
       svgTopAxis.append('g').attr('class', 'topaxis').style("font", "1.8rem sans-serif").attr( 'transform', 'translate(0, 40)' ).call(xAxisA);
 
       //add some text labels
-      svgTopAxis.append('text').text('X').attr('class', 'topaxistext').attr('x', width/2 - 20).attr('y', 20).attr('text-anchor', 'start').attr('fill', 'black');
+      svgTopAxis.append('text').text('X').style('font-weight', 'italic').attr('class', 'topaxistext').attr('x', width/2 - 20).attr('y', 20).attr('text-anchor', 'start').attr('fill', 'black');
       svgTopAxis.append('text').text(units).attr('class', 'topaxisunits').attr('x', width/2 - 70).attr('y', 70).attr('text-anchor', 'start').attr('fill', 'black');
+
+      //add additional ticks
+      //the minor ticks
+      let interval = d3.ticks(left-sigma, right+sigma, 10);  //gets an array of where it is putting tick marks
+
+      let minortick;
+      let minortickmark;
+      for (let i=0; i < interval.length; i += 1) {
+        minortick = (interval[i] - interval[i-1]) / 10;
+        for (let ticks = 1; ticks <= 10; ticks += 1) {
+          minortickmark = interval[i-1] + (minortick * ticks);
+          if (minortickmark > left && minortickmark < right) svgTopAxis.append('line').attr('class', 'topaxisminorticks').attr('x1', xt(minortickmark)).attr('y1', 40).attr('x2', xt(minortickmark) ).attr('y2', 35).attr('stroke', 'black').attr('stroke-width', 1);
+        }
+      }
+
+      //make larger middle tick
+      let middle;
+      for (let i = 0; i < interval.length; i += 1) {
+        middle = (interval[i] + interval[i-1]) / 2;
+        svgTopAxis.append('line').attr('class', 'topaxisminorticks').attr('x1', xt(middle)).attr('y1', 40).attr('x2', xt(middle) ).attr('y2', 30).attr('stroke', 'black').attr('stroke-width', 1);
+      }
     }
   }
 
@@ -446,17 +471,39 @@ $(function() {
     //the width is either -5 to +5 or 25 to 175 etc in real world coords
     //clear axes
     d3.selectAll('.bottomaxis').remove();
+    d3.selectAll('.bottomaxisminorticks').remove();
     d3.selectAll('.bottomaxistext').remove();
 
     xb = d3.scaleLinear().domain([-5.000, 5.000]).range([margin.left-2, width+4]);
 
     //bottom horizontal axis
-    let xAxisB = d3.axisBottom(xb);
+    let xAxisB = d3.axisBottom(xb); //.ticks(20); //.tickValues([]);
     svgBottomAxis.append('g').attr('class', 'bottomaxis').style("font", "1.8rem sans-serif").attr( 'transform', 'translate(0, 0)' ).call(xAxisB);
 
     //add some text labels
     if (tab === 'Normal')   svgBottomAxis.append('text').text('z').attr('class', 'bottomaxistext').attr('x', width/2 + 100).attr('y', 40).attr('text-anchor', 'start').attr('fill', 'black');
     if (tab === 'Studentt') svgBottomAxis.append('text').text('z or t').attr('class', 'bottomaxistext').attr('x', width/2 + 100).attr('y', 40).attr('text-anchor', 'start').attr('fill', 'black');
+
+  //add additional ticks
+    //the minor ticks
+    let interval = d3.ticks(-5, 5, 10);  //gets an array of where it is putting tick marks
+
+    let minortick;
+    let minortickmark;
+    for (let i=0; i < interval.length; i += 1) {
+      minortick = (interval[i] - interval[i-1]) / 10;
+      for (let ticks = 1; ticks <= 10; ticks += 1) {
+        minortickmark = interval[i-1] + (minortick * ticks);
+        if (minortickmark > -5 && minortickmark < 5) svgBottomAxis.append('line').attr('class', 'bottomaxisminorticks').attr('x1', xb(minortickmark)).attr('y1', 0).attr('x2', xb(minortickmark) ).attr('y2', 5).attr('stroke', 'black').attr('stroke-width', 1);
+      }
+    }
+
+    //make larger middle tick
+    let middle;
+    for (let i = 0; i < interval.length; i += 1) {
+      middle = (interval[i] + interval[i-1]) / 2;
+      svgBottomAxis.append('line').attr('class', 'bottomaxisminorticks').attr('x1', xb(middle)).attr('y1', 0).attr('x2', xb(middle) ).attr('y2', 10).attr('stroke', 'black').attr('stroke-width', 1);
+    }
 
   }
 
@@ -468,16 +515,15 @@ $(function() {
     }
 
     //scale it to fit in with drawing area
-    functionHeight = d3.max(normalpdf, function(d) { return d.y});
+    //functionHeight = d3.max(normalpdf, function(d) { return d.y});
     normalpdf.forEach(function(v) {
       v.y = scaleypdf(v.y);
     })
-
+ 
   }
 
   function scaleypdf(y) {
-    //return y * realHeight / functionHeight * 0.9 + 0.2;
-    return y * 250;
+     return y * 250;
   }
 
   function drawNormalPDF() {
@@ -515,7 +561,7 @@ $(function() {
     }
 
     //scale it to fit in with drawing area
-    tfunctionHeight = d3.max(tpdf, function(d) { return d.y});
+    //tfunctionHeight = d3.max(tpdf, function(d) { return d.y});
     tpdf.forEach(function(v) {
       v.y = tscaleypdf(v.y);
     })
@@ -713,14 +759,14 @@ $(function() {
             let pfromgt = 1 - pfromlt;                       //prob from slider less than   
             let ptolt   = jStat.studentt.cdf(zto, df);   //prob to slider less than
             let ptogt   = 1 - ptolt;                         //prob to slider greater than
-            let mid;
+            let mid = Math.abs((1 - ptolt - pfromgt));
 
-            pfromlt = pfromlt.toFixed(4);
-            pfromgt = pfromgt.toFixed(4);
-            ptolt   = ptolt.toFixed(4);
-            ptogt   = ptogt.toFixed(4);
-
-            mid = Math.abs((1 - ptolt - pfromgt)).toFixed(4); 
+            pfromlt = pfromlt.toFixed(4).toString().replace('0.', '.');
+            pfromgt = pfromgt.toFixed(4).toString().replace('0.', '.');
+            ptolt   = ptolt.toFixed(4).toString().replace('0.', '.');
+            ptogt   = ptogt.toFixed(4).toString().replace('0.', '.');
+            mid     = mid.toFixed(4).toString().replace('0.', '.');
+             
 
             //add a background rectangle to get background colour for text
             svgP.append('rect').attr('class', 'probability').attr('x',xb(zfrom) - 75 ).attr('y', rheight - 50).attr('width', 70).attr('height', 27).attr('fill', 'white').attr('stroke', 'black').attr('stroke-width', 1);
