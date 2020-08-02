@@ -21,12 +21,13 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 0.1.9   2020-08-01  #8 Centre probability box between two critical lines + Adjusted key caption position for z and t
 0.1.10  2020-08-01  #7 Draw X values on critical lines     
 0.1.11  2020-08-01  #10 Automatic nudge on mousedown 
-0.1.12  2020-08-01  #11 DF slider and textbox fixes              
+0.1.12  2020-08-01  #11 DF slider and textbox fixes     
+0.1.13  2020-08-02  #7 Adjust position of X values         
 
 */
 //#endregion 
 
-let version = '0.1.12';
+let version = '0.1.13';
 
 'use strict';
 $(function() {
@@ -465,10 +466,10 @@ $(function() {
     if (tab === 'Studentt') drawTPDF();
     
     //#region TESTING -------------------------------------------------------------------
-    $notails.prop('checked', false);
-    notails = false;
-    $onetail.prop('checked', true);
-    onetail = true;
+    // $notails.prop('checked', false);
+    // notails = false;
+    // $onetail.prop('checked', true);
+    // onetail = true;
     // $twotails.prop('checked', true);
     // twotails = true;
 
@@ -778,9 +779,9 @@ $(function() {
           if (showxaxis) {
             leftX = (mu + zfrom*sigma).toFixed(1);
             //create a white borderless rectangle behind so as to cut out that part of the critical line
-            svgP.append('rect').attr('class', 'criticalvalueline').attr('x', xb(zfrom) - 30 ).attr('y', 0).attr('width', 80).attr('height', 20).attr('fill', 'white').attr('stroke', 'none').attr('stroke-width', 1);
-            svgP.append('text').text('X=').attr('class', 'criticalvalueline').attr('x', xb(zfrom) - 25).attr('y', 15).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").style('font-style', 'italic').attr('fill', 'black');
-            svgP.append('text').text(leftX).attr('class', 'criticalvalueline').attr('x', xb(zfrom) + 5).attr('y', 15).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+            //svgP.append('rect').attr('class', 'criticalvalueline').attr('x', xb(zfrom) - 30 ).attr('y', 0).attr('width', 80).attr('height', 20).attr('fill', 'white').attr('stroke', 'none').attr('stroke-width', 1);
+            svgP.append('text').text('X=').attr('class', 'criticalvalueline').attr('x', xb(zfrom) - 66).attr('y', 25).attr('text-anchor', 'start').style("font", "1.7rem sans-serif").style('font-style', 'italic').attr('fill', 'black');
+            svgP.append('text').text(leftX).attr('class', 'criticalvalueline').attr('x', xb(zfrom) - 45).attr('y', 25).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
           }
 
           svgP.append('line').attr('class', 'criticalvalueline').attr('x1', xb(zto)).attr('y1', y(0)).attr('x2', xb(zto)).attr('y2', y(realHeight /*dto*/)).attr('stroke', 'black').attr('stroke-width', 2);
@@ -790,9 +791,9 @@ $(function() {
           //label of right  X value
           if (showxaxis) {
             rightX = (mu + zto*sigma).toFixed(1);
-            svgP.append('rect').attr('class', 'criticalvalueline').attr('x', xb(zto) - 30 ).attr('y', 0).attr('width', 80).attr('height', 20).attr('fill', 'white').attr('stroke', 'none').attr('stroke-width', 1);
-            if (showxaxis) svgP.append('text').text('X=').attr('class', 'criticalvalueline').attr('x', xb(zto) - 25).attr('y', 15).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").style('font-style', 'italic').attr('fill', 'black');
-            if (showxaxis) svgP.append('text').text(rightX).attr('class', 'criticalvalueline').attr('x', xb(zto) + 5).attr('y', 15).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+            //svgP.append('rect').attr('class', 'criticalvalueline').attr('x', xb(zto) - 30 ).attr('y', 0).attr('width', 80).attr('height', 20).attr('fill', 'white').attr('stroke', 'none').attr('stroke-width', 1);
+            if (showxaxis) svgP.append('text').text('X=').attr('class', 'criticalvalueline').attr('x', xb(zto) + 3).attr('y', 25).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").style('font-style', 'italic').attr('fill', 'black');
+            if (showxaxis) svgP.append('text').text(rightX).attr('class', 'criticalvalueline').attr('x', xb(zto) + 25).attr('y', 25).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
           }
         }
 
