@@ -22,12 +22,13 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 0.1.10  2020-08-01  #7 Draw X values on critical lines     
 0.1.11  2020-08-01  #10 Automatic nudge on mousedown 
 0.1.12  2020-08-01  #11 DF slider and textbox fixes     
-0.1.13  2020-08-02  #7 Adjust position of X values         
+0.1.13  2020-08-02  #7 Adjust position of X values 
+0.1.14  2020-08-02  #10 Enhanced auto nudge to allow delay        
 
 */
 //#endregion 
 
-let version = '0.1.13';
+let version = '0.1.14';
 
 'use strict';
 $(function() {
@@ -151,7 +152,11 @@ $(function() {
     });
   });
 
+
+  let pause = 400;
+  let delay = 50;
   let repeatId;
+  let pauseId;
 
   //#endregion
 
@@ -932,72 +937,90 @@ $(function() {
     drawCriticalTails();
   }
 
-  let delay = 50;
 
-  $leftnudgebackward.on('click', function(e) {
-    if (zfrom > -5) zfrom -= 0.001;
-    if (twotails) zto = -zfrom;
-    zsliderUpdate();
-  })
-
+  //left nudge backwards
   $leftnudgebackward.on('mousedown', function() {
-    repeatId = setInterval ( "$('#leftnudgebackward').trigger( 'click' );", delay );
+    leftnudgebackward();
+    pauseId = setTimeout(function() {
+      repeatId = setInterval ( function() {
+        leftnudgebackward();
+      }, delay );
+    }, pause)  
   })
 
   $leftnudgebackward.on('mouseup', function() {
-    clearInterval(repeatId)
+    clearTimeout(pauseId);
+    clearInterval(repeatId);
   })
 
-
-
-  $leftnudgeforward.on('click', function(e) {
-    //while ( $leftnudgeforward.length ) {
-      if (zfrom < 5) zfrom += 0.001;
-      if (twotails) zto = -zfrom;
-      zsliderUpdate();
-    //}
-  })
-
+  function leftnudgebackward() {
+    if (zfrom > -5) zfrom -= 0.001;
+    if (twotails) zto = -zfrom;
+    zsliderUpdate();
+  }
+  
+  //leftnudgeforwards
   $leftnudgeforward.on('mousedown', function() {
-    repeatId = setInterval ( "$('#leftnudgeforward').trigger( 'click' );", delay );
+    leftnudgeforward();
+    pauseId = setTimeout(function() {
+      repeatId = setInterval ( function() {
+        leftnudgeforward();
+      }, delay );
+    }, pause)
   })
 
   $leftnudgeforward.on('mouseup', function() {
-    clearInterval(repeatId)
+    clearTimeout(pauseId);
+    clearInterval(repeatId);
   })
 
-
-
-  $rightnudgebackward.on('click', function(e) {
-    if (zto > -5) zto -= 0.001;
-    if (twotails) zfrom = -zto;
+  function leftnudgeforward() {
+    if (zfrom < 5) zfrom += 0.001;
+    if (twotails) zto = -zfrom;
     zsliderUpdate();
-  })
+  }
 
+
+  //right nudge backwards
   $rightnudgebackward.on('mousedown', function() {
-    repeatId = setInterval ( "$('#rightnudgebackward').trigger( 'click' );", delay );
+    rightnudgebackward();
+    pauseId = setTimeout(function() {
+      repeatId = setInterval ( function() {
+        rightnudgebackward();
+      }, delay );
+    }, pause)
   })
 
   $rightnudgebackward.on('mouseup', function() {
-    clearInterval(repeatId)
+    clearTimeout(pauseId);
+    clearInterval(repeatId);
   })
 
+  function rightnudgebackward() {
+    if (zto > -5) zto -= 0.001;
+    if (twotails) zfrom = -zto;
+    zsliderUpdate();
+  }
 
+  //right nudge forward
+  $rightnudgeforward.on('mousedown', function() {
+    rightnudgeforward();
+    pauseId = setTimeout(function() {
+      repeatId = setInterval ( function() {
+        rightnudgeforward();
+      }, delay );
+    }, pause)  })
 
-  $rightnudgeforward.on('click', function(e) {
+  $rightnudgeforward.on('mouseup', function() {
+    clearTimeout(pauseId);
+    clearInterval(repeatId);
+  })
+
+  function rightnudgeforward() {
     if (zto < 5) zto += 0.001;
     if (twotails) zfrom = -zto;
     zsliderUpdate();
-  })
-
-  $rightnudgeforward.on('mousedown', function() {
-    mdown = true;
-    repeatId = setInterval ( "$('#rightnudgeforward').trigger( 'click' );", delay );
-  })
-
-  $rightnudgeforward.on('mouseup', function() {
-    clearInterval(repeatId)
-  })
+  }
 
   /*---------------------------------------mu lines   zlines  x-axis   units-----------------------------------------------*/
 
@@ -1096,33 +1119,47 @@ $(function() {
     updateMu();
   })
 
-  $munudgebackward.on('click', function() {
-    mu -= 1;
-    $mu.val(mu);
-    updateMu();
-  })
-
+  //mu nudge backwards
   $munudgebackward.on('mousedown', function() {
-    repeatId = setInterval ( "$('#munudgebackward').trigger( 'click' );", delay );
+    munudgebackward();
+    pauseId = setTimeout(function() {
+      repeatId = setInterval ( function() {
+        munudgebackward();
+      }, delay );
+    }, pause)
   })
 
   $munudgebackward.on('mouseup', function() {
-    clearInterval(repeatId)
+    clearTimeout(pauseId);
+    clearInterval(repeatId);
   })
 
-  $munudgeforward.on('click', function() {
-    mu += 1;
+  function munudgebackward() {
+    mu -= 1;
     $mu.val(mu);
     updateMu();
-  })
+  }
 
+  //mu nudge forward
   $munudgeforward.on('mousedown', function() {
-    repeatId = setInterval ( "$('#munudgeforward').trigger( 'click' );", delay );
+    munudgeforward();
+    pauseId = setTimeout(function() {
+      repeatId = setInterval ( function() {
+        munudgeforward();
+      }, delay );
+    }, pause)
   })
 
   $munudgeforward.on('mouseup', function() {
-    clearInterval(repeatId)
+    clearTimeout(pauseId);
+    clearInterval(repeatId);
   })
+
+  function munudgeforward() {
+    mu += 1;
+    $mu.val(mu);
+    updateMu();
+  }
 
   function updateMu() {
     $muslider.update({
@@ -1133,39 +1170,52 @@ $(function() {
   }
 
 
-
   $sigma.on('change', function() {
     sigma = parseFloat($sigma.val());
     updateSigma();
   })
 
-  $sigmanudgebackward.on('click', function() {
-    if (sigma > 1) sigma -= 1;
-    $sigma.val(sigma);
-    updateSigma();
-  })
-
+  //sigma nudge backwards
   $sigmanudgebackward.on('mousedown', function() {
-    repeatId = setInterval ( "$('#sigmanudgebackward').trigger( 'click' );", delay );
+    sigmanudgebackward();
+    pauseId = setTimeout(function() {
+      repeatId = setInterval ( function() {
+        sigmanudgebackward();
+      }, delay );
+    }, pause)
   })
 
   $sigmanudgebackward.on('mouseup', function() {
-    clearInterval(repeatId)
+    clearTimeout(pauseId);
+    clearInterval(repeatId);
   })
 
-  $sigmanudgeforward.on('click', function() {
-    sigma += 1;
+  function sigmanudgebackward() {
+    if (sigma > 1) sigma -= 1;
     $sigma.val(sigma);
     updateSigma();
-  })
+  }
 
+  //sigma nudge forward
   $sigmanudgeforward.on('mousedown', function() {
-    repeatId = setInterval ( "$('#sigmanudgeforward').trigger( 'click' );", delay );
+    sigmanudgeforward();
+    pauseId = setTimeout(function() {
+      repeatId = setInterval ( function() {
+        sigmanudgeforward();
+      }, delay );
+    }, pause)
   })
 
   $sigmanudgeforward.on('mouseup', function() {
-    clearInterval(repeatId)
+    clearTimeout(pauseId);
+    clearInterval(repeatId);
   })
+
+  function sigmanudgeforward() {
+    sigma += 1;
+    $sigma.val(sigma);
+    updateSigma();
+  } 
 
   function updateSigma() {
     $sigmaslider.update({
@@ -1216,35 +1266,50 @@ $(function() {
     updateDF();
   })
 
-  $dfnudgebackward.on('click', function() {
+
+  //df nudge backwards
+  $dfnudgebackward.on('mousedown', function() {
+    dfnudgebackward();
+    pauseId = setTimeout(function() {
+      repeatId = setInterval ( function() {
+        dfnudgebackward();
+      }, delay );
+    }, pause)
+  })
+
+  $dfnudgebackward.on('mouseup', function() {
+    clearTimeout(pauseId);
+    clearInterval(repeatId);
+  })  
+
+   function dfnudgebackward() {
     df -= 1;
     if (df < 1) df = 1;
     $df.val(df);
     updateDF();
+  }
+
+  //df nudge forward
+  $dfnudgeforward.on('mousedown', function() {
+    dfnudgeforward();
+    pauseId = setTimeout(function() {
+      repeatId = setInterval ( function() {
+        dfnudgeforward();
+      }, delay );
+    }, pause)
   })
 
-  $dfnudgebackward.on('mousedown', function() {
-    repeatId = setInterval ( "$('#dfnudgebackward').trigger( 'click' );", delay );
+  $dfnudgeforward.on('mouseup', function() {
+    clearTimeout(pauseId);
+    clearInterval(repeatId);
   })
 
-  $dfnudgebackward.on('mouseup', function() {
-    clearInterval(repeatId)
-  })  
-
-  $dfnudgeforward.on('click', function() {
+  function dfnudgeforward() {
     df += 1;
     if (df > 100) df = 100;
     $df.val(df);
     updateDF();
-  })
-
-  $dfnudgeforward.on('mousedown', function() {
-    repeatId = setInterval ( "$('#dfnudgeforward').trigger( 'click' );", delay );
-  })
-
-  $dfnudgeforward.on('mouseup', function() {
-    clearInterval(repeatId)
-  })
+  }
   
   function updateDF() {
     $dfslider.update({
