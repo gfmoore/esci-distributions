@@ -10,9 +10,21 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 
 0.0.1       Initial version
 0.1.0       2020-07-25 The first version releaed
-0.1.14
+0.1.15      2020-08-02 #11, #12 Fixing sliders - added some css overrides to slider to blank out left end label
 
 #endregion */
+
+/*------------------------------override on ion slider-----------------------------------*/
+/*blank out end labels*/
+.irs--big .irs-min {
+  color: rgba(0, 0, 0, 0.0);
+  background-color: rgba(0, 0, 0, 0.0);
+}
+
+.irs--big .irs-max {
+  color: rgba(0, 0, 0, 0.0);
+  background-color: rgba(0, 0, 0, 0.0);
+}
 
 /*---------------------------------icons-----------------------------------------------------------*/
 

@@ -23,12 +23,13 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 0.1.11  2020-08-01  #10 Automatic nudge on mousedown 
 0.1.12  2020-08-01  #11 DF slider and textbox fixes     
 0.1.13  2020-08-02  #7 Adjust position of X values 
-0.1.14  2020-08-02  #10 Enhanced auto nudge to allow delay        
+0.1.14  2020-08-02  #10 Enhanced auto nudge to allow delay
+0.1.15  2020-08-12  #11, #12 fixes to sliders        
 
 */
 //#endregion 
 
-let version = '0.1.14';
+let version = '0.1.15';
 
 'use strict';
 $(function() {
@@ -232,7 +233,8 @@ $(function() {
       from: mu,
       step: 1,
       grid: true,
-      grid_num: 10,
+      grid_num: 4,
+      prettify: prettify0,
       //on slider handles change
       onChange: function (data) {
         mu = data.from;
@@ -246,14 +248,19 @@ $(function() {
       skin: 'big',
       type: 'single',
       min: 0,
-      max: 100,
+      max: 50,
       from: sigma, 
       step: 1,
       grid: true,
-      grid_num: 10,
+      grid_num: 5,
+      prettify: prettify0,
       //on slider handles change
       onChange: function (data) {
         sigma = data.from;
+        if (sigma < 1) {
+          sigma = 1;
+          $sigmaslider.update({ from: sigma });
+        }
         $sigma.val(sigma);
         setTopAxis();
         drawCriticalTails();
@@ -268,7 +275,8 @@ $(function() {
       from: df,
       step: 1,
       grid: true,
-      grid_num: 10,
+      grid_num: 5,
+      prettify: prettify0,
       //on slider handles change
       onChange: function (data) {
         df = data.from;
@@ -293,7 +301,7 @@ $(function() {
       step: 0.001,
       grid: true,
       grid_num: 10,
-      prettify: prettify,
+      prettify: prettify3,
       //on slider handles change
       onChange: function (data) {
         zfrom = data.from;
@@ -327,8 +335,12 @@ $(function() {
       })
     }
   
-    function prettify(num) {
+    function prettify3(num) {
       return num.toFixed(3);
+    }
+
+    function prettify0(num) {
+      return num.toFixed(0);
     }
 
     //get reference to sliders
@@ -937,7 +949,6 @@ $(function() {
     drawCriticalTails();
   }
 
-
   //left nudge backwards
   $leftnudgebackward.on('mousedown', function() {
     leftnudgebackward();
@@ -1115,7 +1126,18 @@ $(function() {
   /*-----------------------------------------mu sigma --------------------------------------*/
   //changes to the mu, sigma checkboxes
   $mu.on('change', function() {
-    mu = parseFloat($mu.val());
+    if ( isNaN($mu.val()) ) {
+      $mu.val(mu);
+      return;
+    };
+    mu = parseFloat($mu.val()).toFixed(0);
+    if (mu < 0) {
+      mu = 0;
+    }
+    if (mu > 200) {
+      mu = 200;
+    }
+    $mu.val(mu);
     updateMu();
   })
 
@@ -1171,9 +1193,22 @@ $(function() {
 
 
   $sigma.on('change', function() {
-    sigma = parseFloat($sigma.val());
+    if ( isNaN($sigma.val()) ) {
+      $sigma.val(sigma);
+      return;
+    }
+    sigma = parseFloat($sigma.val()).toFixed(0);
+    if (sigma < 1) {
+      sigma = 1;
+    }
+    if (sigma > 50) {
+      sigma = 50;
+    }
+    $sigma.val(sigma);
     updateSigma();
   })
+
+
 
   //sigma nudge backwards
   $sigmanudgebackward.on('mousedown', function() {
@@ -1255,7 +1290,11 @@ $(function() {
   /*-----------------------------df------------------------------------------------*/
   //changes to the dfcheckboxes
   $df.on('change', function() {
-    df = parseFloat($df.val());
+    if ( isNaN($df.val()) ) {
+      $df.val(df);
+      return;
+    }
+    df = parseFloat($df.val()).toFixed(0);
     if (df < 1) {
       df = 1;
     }
@@ -1265,7 +1304,6 @@ $(function() {
     $df.val(df);
     updateDF();
   })
-
 
   //df nudge backwards
   $dfnudgebackward.on('mousedown', function() {
