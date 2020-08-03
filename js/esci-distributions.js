@@ -30,11 +30,12 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 0.1.18  2020-08-03  #15 Park handle/cursor at left for one tail
 0.1.19  2020-08-03  #18 Lighter green for panel 4
 0.1.20  2020-08-04  #16 Fix snapping problem, but not synchronous move of handles.
+0.1.21  2020-08-04  #16 Added a fix to stop overlaps. Well the cursors can overlap but on release they snap to 0
 
 */
 //#endregion 
 
-let version = '0.1.20';
+let version = '0.1.21';
 
 'use strict';
 $(function() {
@@ -312,15 +313,22 @@ $(function() {
         zfrom = data.from;
         zto   = data.to;
 
+
         if (notails || onetail) {
         }
         if (twotails) {
-          if (zfrom !== oldzfrom) {   //"from" slider changed
-            zto = -zfrom;
+          if (zfrom > 0 || zto < 0) {
+            zfrom = 0;
+            zto = 0;
           }
-          else if (zto !== oldzto) {  //"to" slider changed 
-            zfrom = -zto;
-          } 
+          else {
+            if (zfrom !== oldzfrom) {   //"from" slider changed
+              zto = -zfrom;
+            }
+            else if (zto !== oldzto) {  //"to" slider changed 
+              zfrom = -zto;
+            } 
+          }
         }
 
         drawCriticalTails();
@@ -328,6 +336,7 @@ $(function() {
       },
 
       onFinish: function (data) {
+
         setSliders();
       }
     })
