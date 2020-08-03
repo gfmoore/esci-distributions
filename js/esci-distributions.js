@@ -29,11 +29,12 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 0.1.17  2020-08-03  #18 Palegreen background for panel 4
 0.1.18  2020-08-03  #15 Park handle/cursor at left for one tail
 0.1.19  2020-08-03  #18 Lighter green for panel 4
+0.1.20  2020-08-04  #16 Fix snapping problem, but not synchronous move of handles.
 
 */
 //#endregion 
 
-let version = '0.1.19';
+let version = '0.1.20';
 
 'use strict';
 $(function() {
@@ -157,11 +158,12 @@ $(function() {
     });
   });
 
-
   let pause = 400;
   let delay = 50;
   let repeatId;
   let pauseId;
+
+  let zslidercount = 0;    //when zslidercount = 500 cause the opposite slider to jump           
 
   //#endregion
 
@@ -314,13 +316,28 @@ $(function() {
         if (notails || onetail) {
         }
         if (twotails) {
-          if (zfrom !== oldzfrom) {   //"from" slider changed
-            zto = -zfrom;
+          zslidercount += 1;
+          
+          if (zslidercount === 10) {
+            zslidercount = 0;
+            if (zfrom !== oldzfrom) {   //"from" slider changed
+              zto = -zfrom;
+            }
+            else if (zto !== oldzto) {  //"to" slider changed 
+              zfrom = -zto;
+            } 
+
+            setSliders();
           }
-          else if (zto !== oldzto) {  //"to" slider changed 
-            zfrom = -zto;
-          } 
+
+          //don't allow overlap
+          // if (zto < zfrom) {
+          //   zto = zfrom;
+          //   return;
+          // }
+
         }
+
         drawCriticalTails();
         //setSliders(); //it just doesn't work here. slider is too slow to respond I think
       },
@@ -331,12 +348,12 @@ $(function() {
     })
 
     function setSliders() {
-      oldzfrom = zfrom;
-      oldzto   = zto;
       $zslider.update( {
         from: zfrom,
         to:   zto
       })
+      oldzfrom = zfrom;
+      oldzto   = zto;
     }
   
     function prettify3(num) {
@@ -698,13 +715,13 @@ $(function() {
     if (onetail) {
       //Park left handle to -5
       zfrom = -5;
-      zoldfrom = -5
+      oldzfrom = -5
       $zslider.update( { from: zfrom, to: zto })
     }
     if (twotails) {
       zfrom = -zto; //had to choose one side
-      zoldfrom = zfrom
-      zoldto = zto;
+      oldzfrom = zfrom
+      oldzto = zto;
       $zslider.update( { from: zfrom, to: zto })
     }
     drawCriticalTails();   
@@ -731,13 +748,13 @@ $(function() {
     if (onetail) {
       //Park left handle to -5
       zfrom = -5;
-      zoldfrom = -5
+      oldzfrom = -5
       $zslider.update( { from: zfrom, to: zto })
     }
     if (twotails) {
       zfrom = -zto; //had to choose one side
-      zoldfrom = zfrom
-      zoldto = zto;
+      oldzfrom = zfrom
+      oldzto = zto;
       $zslider.update( { from: zfrom, to: zto })
     }
     drawCriticalTails();   
@@ -960,8 +977,8 @@ $(function() {
   /*----------------------------------------------Slider panel-------------------------------------*/
 
   function zsliderUpdate() {
-    zoldfrom = zfrom;
-    zoldto = zto;
+    oldzfrom = zfrom;
+    oldzto = zto;
     $zslider.update( { from: zfrom, to: zto })
     drawCriticalTails();
   }
