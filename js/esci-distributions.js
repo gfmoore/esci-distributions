@@ -24,12 +24,13 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 0.1.12  2020-08-01  #11 DF slider and textbox fixes     
 0.1.13  2020-08-02  #7 Adjust position of X values 
 0.1.14  2020-08-02  #10 Enhanced auto nudge to allow delay
-0.1.15  2020-08-12  #11, #12 fixes to sliders        
+0.1.15  2020-08-02  #11, #12 fixes to sliders 
+0.1.16  2020-08-03  #6 More tweaks to probabilities and how they are displayed.     
 
 */
 //#endregion 
 
-let version = '0.1.15';
+let version = '0.1.16';
 
 'use strict';
 $(function() {
@@ -863,22 +864,22 @@ $(function() {
             //add a background rectangle to get background colour for text
 
             //left box
-            svgP.append('rect').attr('class', 'probability').attr('x',xb(zfrom) - 62 ).attr('y', rheight - 50).attr('width', 58).attr('height', 27).attr('fill', 'white').attr('stroke', 'black').attr('stroke-width', 1);
-            svgP.append('text').text(pfromlt).attr('class', 'probability').attr('x', xb(zfrom) - 58).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+            svgP.append('rect').attr('class', 'probability').attr('x',xb(zfrom) - 62 ).attr('y', rheight - 50).attr('width', 58).attr('height', 27).attr('fill', 'white').attr('stroke', 'none').attr('stroke-width', 1);
+            svgP.append('text').text(pfromlt).attr('class', 'probability').attr('x', xb(zfrom) - 58).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.7rem sans-serif").attr('fill', 'blue');
 
             //middle box
-            svgP.append('rect').attr('class', 'probability').attr('x', xb((zfrom+zto)/2) - 30 ).attr('y', rheight - 80).attr('width', 68).attr('height', 27).attr('fill', 'lemonchiffon').attr('stroke', 'black').attr('stroke-width', 1);
-            svgP.append('text').text(mid).attr('class',   'probability').attr('x', xb((zfrom+zto)/2) -25 ).attr('y', rheight - 60).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+            svgP.append('rect').attr('class', 'probability').attr('x', xb((zfrom+zto)/2) - 30 ).attr('y', rheight - 80).attr('width', 68).attr('height', 27).attr('fill', 'white').attr('stroke', 'none').attr('stroke-width', 1);
+            svgP.append('text').text(mid).attr('class',   'probability').attr('x', xb((zfrom+zto)/2) -25 ).attr('y', rheight - 60).attr('text-anchor', 'start').style("font", "1.7rem sans-serif").attr('fill', 'black');
 
             //right box
-            svgP.append('rect').attr('class', 'probability').attr('x',xb(zto) + 5 ).attr('y', rheight - 50).attr('width', 58).attr('height', 27).attr('fill', 'white').attr('stroke', 'black').attr('stroke-width', 1);
-            svgP.append('text').text(ptogt).attr('class',   'probability').attr('x', xb(zto) + 10).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+            svgP.append('rect').attr('class', 'probability').attr('x',xb(zto) + 5 ).attr('y', rheight - 50).attr('width', 58).attr('height', 27).attr('fill', 'white').attr('stroke', 'none').attr('stroke-width', 1);
+            svgP.append('text').text(ptogt).attr('class',   'probability').attr('x', xb(zto) + 10).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.7rem sans-serif").attr('fill', 'blue');
 
             //above right box
             if (twotails) {
-              svgP.append('text').text('two tails').attr('class',   'probability').attr('x', xb(zto) + 7).attr('y', rheight - 120).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
-              svgP.append('rect').attr('class', 'probability').attr('x',xb(zto) + 5 ).attr('y', rheight - 110).attr('width', 58).attr('height', 27).attr('fill', 'honeydew').attr('stroke', 'black').attr('stroke-width', 1);
-              svgP.append('text').text(twotailtotal).attr('class',   'probability').attr('x', xb(zto) + 10).attr('y', rheight - 90).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+              svgP.append('text').text('two tails').attr('class',   'probability').attr('x', xb(zto) + 12).attr('y', rheight - 115).attr('text-anchor', 'start').style("font", "1.7rem sans-serif").attr('fill', 'blue');
+              svgP.append('rect').attr('class', 'probability').attr('x',xb(zto) + 5 ).attr('y', rheight - 110).attr('width', 58).attr('height', 27).attr('fill', 'white').attr('stroke', 'none').attr('stroke-width', 1);
+              svgP.append('text').text(twotailtotal).attr('class',   'probability').attr('x', xb(zto) + 10).attr('y', rheight - 90).attr('text-anchor', 'start').style("font", "1.7rem sans-serif").attr('fill', 'blue');
             }
           }
 
@@ -902,22 +903,23 @@ $(function() {
 
             //add a background rectangle to get background colour for text
             //left box
-            svgP.append('rect').attr('class', 'probability').attr('x',xb(zfrom) - 62 ).attr('y', rheight - 50).attr('width', 58).attr('height', 27).attr('fill', 'white').attr('stroke', 'black').attr('stroke-width', 1);
-            svgP.append('text').text(pfromlt).attr('class', 'probability').attr('x', xb(zfrom) - 58).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+            svgP.append('rect').attr('class', 'probability').attr('x',xb(zfrom) - 62 ).attr('y', rheight - 50).attr('width', 58).attr('height', 27).attr('fill', 'white').attr('stroke', 'none').attr('stroke-width', 1);
+            svgP.append('text').text(pfromlt).attr('class', 'probability').attr('x', xb(zfrom) - 58).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.7rem sans-serif").attr('fill', 'red');
 
             //middle box
-            svgP.append('rect').attr('class', 'probability').attr('x', xb((zfrom+zto)/2) - 30 ).attr('y', rheight - 100).attr('width', 68).attr('height', 27).attr('fill', 'lemonchiffon').attr('stroke', 'black').attr('stroke-width', 1);
-            svgP.append('text').text(mid).attr('class',   'probability').attr('x', xb((zfrom+zto)/2) - 25).attr('y', rheight - 80).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+            svgP.append('rect').attr('class', 'probability').attr('x', xb((zfrom+zto)/2) - 30 ).attr('y', rheight - 80).attr('width', 68).attr('height', 27).attr('fill', 'white').attr('stroke', 'none').attr('stroke-width', 1);
+            svgP.append('text').text(mid).attr('class',   'probability').attr('x', xb((zfrom+zto)/2) - 25).attr('y', rheight - 60).attr('text-anchor', 'start').style("font", "1.7rem sans-serif").attr('fill', 'black');
 
             //right box
-            svgP.append('rect').attr('class', 'probability').attr('x',xb(zto) + 5 ).attr('y', rheight - 50).attr('width', 58).attr('height', 27).attr('fill', 'white').attr('stroke', 'black').attr('stroke-width', 1);
-            svgP.append('text').text(ptogt).attr('class',   'probability').attr('x', xb(zto) + 10).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+            svgP.append('rect').attr('class', 'probability').attr('x',xb(zto) + 5 ).attr('y', rheight - 50).attr('width', 58).attr('height', 27).attr('fill', 'white').attr('stroke', 'none').attr('stroke-width', 1);
+            svgP.append('text').text(ptogt).attr('class',   'probability').attr('x', xb(zto) + 10).attr('y', rheight - 30).attr('text-anchor', 'start').style("font", "1.7rem sans-serif").attr('fill', 'red');
 
             //above right box
             if (twotails) {
-              svgP.append('text').text('two tails').attr('class',   'probability').attr('x', xb(zto) + 7).attr('y', rheight - 120).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
-              svgP.append('rect').attr('class', 'probability').attr('x',xb(zto) + 5 ).attr('y', rheight - 110).attr('width', 58).attr('height', 27).attr('fill', 'honeydew').attr('stroke', 'black').attr('stroke-width', 1);
-              svgP.append('text').text(twotailtotal).attr('class',   'probability').attr('x', xb(zto) + 15).attr('y', rheight - 90).attr('text-anchor', 'start').style("font", "1.8rem sans-serif").attr('fill', 'black');
+              svgP.append('text').text('two tails').attr('class',   'probability').attr('x', xb(zto) + 12).attr('y', rheight - 115).attr('text-anchor', 'start').style("font", "1.7rem sans-serif").attr('fill', 'red');
+              svgP.append('rect').attr('class', 'probability').attr('x',xb(zto) + 5 ).attr('y', rheight - 110).attr('width', 58).attr('height', 27).attr('fill', 'white').attr('stroke', 'none').attr('stroke-width', 1);
+              svgP.append('text').text(twotailtotal).attr('class',   'probability').attr('x', xb(zto) + 15).attr('y', rheight - 90).attr('text-anchor', 'start').style("font", "1.7rem sans-serif").attr('fill', 'red');
+
             }
 
           }
