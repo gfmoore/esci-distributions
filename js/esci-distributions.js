@@ -26,11 +26,12 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 0.1.14  2020-08-02  #10 Enhanced auto nudge to allow delay
 0.1.15  2020-08-02  #11, #12 fixes to sliders 
 0.1.16  2020-08-03  #6 More tweaks to probabilities and how they are displayed.     
+0.1.17  2020-08-03  #18 Palegreen background for panel 4
 
 */
 //#endregion 
 
-let version = '0.1.16';
+let version = '0.1.17';
 
 'use strict';
 $(function() {
