@@ -12,7 +12,7 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 0.1.0       2020-07-25 The first version releaed
 0.1.15      2020-08-02 #11, #12 Fixing sliders - added some css overrides to slider to blank out left end label
 0.1.17      2020-08-03 #18 Palegreen background for panel 4
-0.1.18
+0.1.19      2020-08-03 #18 Lighter green?
 
 #endregion */
 
@@ -195,7 +195,7 @@ margin-left: 0.5rem;
 
 #ztselect {
   border: 1px solid black;
-  background-color: palegreen;
+  background-color:#cdf6c6;
   padding-left: 0.5rem;
   padding-top: 0.5rem;
   padding-bottom: 1rem;
