@@ -163,7 +163,6 @@ $(function() {
   let repeatId;
   let pauseId;
 
-  let zslidercount = 0;    //when zslidercount = 500 cause the opposite slider to jump           
 
   //#endregion
 
@@ -316,26 +315,12 @@ $(function() {
         if (notails || onetail) {
         }
         if (twotails) {
-          zslidercount += 1;
-          
-          if (zslidercount === 10) {
-            zslidercount = 0;
-            if (zfrom !== oldzfrom) {   //"from" slider changed
-              zto = -zfrom;
-            }
-            else if (zto !== oldzto) {  //"to" slider changed 
-              zfrom = -zto;
-            } 
-
-            setSliders();
+          if (zfrom !== oldzfrom) {   //"from" slider changed
+            zto = -zfrom;
           }
-
-          //don't allow overlap
-          // if (zto < zfrom) {
-          //   zto = zfrom;
-          //   return;
-          // }
-
+          else if (zto !== oldzto) {  //"to" slider changed 
+            zfrom = -zto;
+          } 
         }
 
         drawCriticalTails();
