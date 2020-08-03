@@ -27,11 +27,12 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 0.1.15  2020-08-02  #11, #12 fixes to sliders 
 0.1.16  2020-08-03  #6 More tweaks to probabilities and how they are displayed.     
 0.1.17  2020-08-03  #18 Palegreen background for panel 4
+0.1.18  2020-08-03  #15 Park handle/cursor at left for one tail
 
 */
 //#endregion 
 
-let version = '0.1.17';
+let version = '0.1.18';
 
 'use strict';
 $(function() {
@@ -693,6 +694,12 @@ $(function() {
       $showarea.prop('checked', false);
       showarea = false;
     }
+    if (onetail) {
+      //Park left handle to -5
+      zfrom = -5;
+      zoldfrom = -5
+      $zslider.update( { from: zfrom, to: zto })
+    }
     if (twotails) {
       zfrom = -zto; //had to choose one side
       zoldfrom = zfrom
@@ -719,6 +726,12 @@ $(function() {
     if (notails) {
       $tshowarea.prop('checked', false);
       showarea = false;
+    }
+    if (onetail) {
+      //Park left handle to -5
+      zfrom = -5;
+      zoldfrom = -5
+      $zslider.update( { from: zfrom, to: zto })
     }
     if (twotails) {
       zfrom = -zto; //had to choose one side
