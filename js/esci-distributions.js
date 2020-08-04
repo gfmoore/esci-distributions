@@ -29,13 +29,14 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 0.1.17  2020-08-03  #18 Palegreen background for panel 4
 0.1.18  2020-08-03  #15 Park handle/cursor at left for one tail
 0.1.19  2020-08-03  #18 Lighter green for panel 4
-0.1.20  2020-08-04  #16 Fix snapping problem, but not synchronous move of handles.
-0.1.21  2020-08-04  #16 Added a fix to stop overlaps. Well the cursors can overlap but on release they snap to 0
+0.1.20  2020-08-03  #16 Fix snapping problem, but not synchronous move of handles.
+0.1.21  2020-08-03  #16 Added a fix to stop overlaps. Well the cursors can overlap but on release they snap to 0
+0.1.22  2020-08-04  #12 Put limits on sliders and textboxes
 
 */
 //#endregion 
 
-let version = '0.1.21';
+let version = '0.1.22';
 
 'use strict';
 $(function() {
@@ -416,7 +417,7 @@ $(function() {
     clear();
   });
 
-  //set evrything to a default state.
+  //set everything to a default state.
   function clear() {
     
     //tab Normal
@@ -1186,6 +1187,7 @@ $(function() {
 
   function munudgebackward() {
     mu -= 1;
+    if (mu < 0) mu = 0;
     $mu.val(mu);
     updateMu();
   }
@@ -1207,6 +1209,7 @@ $(function() {
 
   function munudgeforward() {
     mu += 1;
+    if (mu > 200) mu = 200;
     $mu.val(mu);
     updateMu();
   }
@@ -1254,7 +1257,8 @@ $(function() {
   })
 
   function sigmanudgebackward() {
-    if (sigma > 1) sigma -= 1;
+    sigma -= 1;
+    if (sigma < 1) sigma = 1;
     $sigma.val(sigma);
     updateSigma();
   }
@@ -1276,6 +1280,7 @@ $(function() {
 
   function sigmanudgeforward() {
     sigma += 1;
+    if (sigma > 50) sigma = 50;
     $sigma.val(sigma);
     updateSigma();
   } 
@@ -1348,7 +1353,7 @@ $(function() {
     clearInterval(repeatId);
   })  
 
-   function dfnudgebackward() {
+  function dfnudgebackward() {
     df -= 1;
     if (df < 1) df = 1;
     $df.val(df);
