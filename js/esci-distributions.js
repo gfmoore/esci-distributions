@@ -32,11 +32,11 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 0.1.20  2020-08-03  #16 Fix snapping problem, but not synchronous move of handles.
 0.1.21  2020-08-03  #16 Added a fix to stop overlaps. Well the cursors can overlap but on release they snap to 0
 0.1.22  2020-08-04  #12 Put limits on sliders and textboxes
-
+0.1.23  2020-08-05  #16 Replaced ionslider for z slider with jquery-ui and slider-pips libraries
 */
 //#endregion 
 
-let version = '0.1.22';
+let version = '0.1.23';
 
 'use strict';
 $(function() {
@@ -60,7 +60,6 @@ $(function() {
   let svgTopAxis;                                                             //svg reference to the top axis
   let svgBottomAxis;                                                          //svg reference to the bottom axis
   let svgP;                                                                   //the svg reference to pdfdisplay
-
 
   let mu                      = 100;
   let sigma                   = 15;                                          //the population mean, standard deviation and degrees of freedom
@@ -127,7 +126,7 @@ $(function() {
   let functionHeight;                                                         //get max height of pdf function
   let tfunctionHeight;
                   
-  let $zslider;                                                               //reference to slider
+  const $zslider              = $('#zslider');                                //reference to slider
   let zfrom, zto;                                                             //the current from to values on the slider
   let oldzfrom, oldzto;                                                       //remember old (previous) values to determine whcih slider changed
 
@@ -138,10 +137,10 @@ $(function() {
   let mid;
   let twotailtotal;
 
-  const $leftnudgebackward    = $('#leftnudgebackward')
-  const $leftnudgeforward     = $('#leftnudgeforward');
-  const $rightnudgebackward   = $('#rightnudgebackward')
-  const $rightnudgeforward    = $('#rightnudgeforward');
+  const $fromnudgebackward    = $('#fromnudgebackward')
+  const $fromnudgeforward     = $('#fromnudgeforward');
+  const $tonudgebackward   = $('#tonudgebackward')
+  const $tonudgeforward    = $('#tonudgeforward');
 
   const $munudgebackward      = $('#munudgebackward'); 
   const $munudgeforward       = $('#munudgeforward'); 
@@ -160,10 +159,13 @@ $(function() {
     });
   });
 
-  let pause = 400;
+  let pause = 500;
   let delay = 50;
   let repeatId;
   let pauseId;
+
+  let frommoved = false;
+  let tomoved   = false;
 
 
   //#endregion
@@ -298,86 +300,106 @@ $(function() {
       }
     })
 
-    $('#zslider').ionRangeSlider({
-      skin: 'big',
-      type: 'double',
-      min: -5.000,
-      max: 5.000,
-      from: -5.000,
-      to: 5.000,
-      step: 0.001,
-      grid: true,
-      grid_num: 10,
-      prettify: prettify3,
-      //on slider handles change
-      onChange: function (data) {
-        zfrom = data.from;
-        zto   = data.to;
-
-
-        if (notails || onetail) {
-        }
-        if (twotails) {
-          if (zfrom > 0 || zto < 0) {
-            zfrom = 0;
-            zto = 0;
-          }
-          else {
-            if (zfrom !== oldzfrom) {   //"from" slider changed
-              zto = -zfrom;
-            }
-            else if (zto !== oldzto) {  //"to" slider changed 
-              zfrom = -zto;
-            } 
-          }
-        }
-
-        drawCriticalTails();
-        //setSliders(); //it just doesn't work here. slider is too slow to respond I think
-      },
-
-      onFinish: function (data) {
-
-        setSliders();
-      }
-    })
-
-    function setSliders() {
-      $zslider.update( {
-        from: zfrom,
-        to:   zto
-      })
-      oldzfrom = zfrom;
-      oldzto   = zto;
-    }
-  
-    function prettify3(num) {
-      return num.toFixed(3);
-    }
-
     function prettify0(num) {
       return num.toFixed(0);
+    }
+
+    function prettify3(num) {
+      return num.toFixed(3);
     }
 
     //get reference to sliders
     $muslider    = $("#muslider").data("ionRangeSlider");
     $sigmaslider = $("#sigmaslider").data("ionRangeSlider");
     $dfslider    = $("#dfslider").data("ionRangeSlider");
-    $zslider     = $("#zslider").data("ionRangeSlider");
-
-
+    
     $mu.val(mu);
     $sigma.val(sigma);
 
     $dfslider.update({ from: df });
     $df.val(df);
 
+  }
+
+  /*-------------Replacement zslider uses jquery.ui and jqueryui-slider-pips library----------------*/
+    
+  function setupzSlider() {
+    //jQueryUI slider
+    $zslider.slider({
+      animate: 'fast',
+      min: -5,
+      max: 5,
+      range: true,
+      values: [ -5, 5 ],
+      step: 0.001,
+    });
+
+    //jQuery-ui-Slider-Pips
+    let zslider = $zslider.slider( 'instance' );
+    $zslider.slider().slider('pips', {
+      first: 'label',
+      pips: true,
+      last: 'label',
+      rest: 'label',
+      step: 100
+    }).slider('float', {
+      handle: true,
+      pips: false
+    })
+
     zfrom = -5.000;
     zto = 5.000;
-
-    //create some old values so I can see which slider has changed
     oldzfrom = -5.000;
     oldzto   = 5.000;
+  }
+
+
+  $zslider.on( 'slide', function( e, ui ) {
+
+    zfrom = $zslider.slider( 'values', 0 );
+    zto   = $zslider.slider( 'values', 1 );
+
+    if (notails || onetail) {
+      //do nothing
+    }
+
+    if (twotails) {
+      //don't allow to cross
+      if (zfrom > 0 || zto < 0) {
+        zfrom = 0;
+        zto = 0;
+      }
+      else {
+        //need to determine if from or to slider moved?
+        if (zfrom !== oldzfrom) {
+          frommoved = true;
+          oldzfrom = zfrom;
+        }
+        else {
+          frommoved = false;
+        }
+        if (zto !== oldzto) {
+          tomoved = true;
+          oldzto = zto;
+        }
+        else {
+          tomoved = false;
+        }
+        if (frommoved) zto   = -zfrom;
+        if (tomoved)   zfrom = -zto;
+      }
+      setzSliders();
+    }
+    drawCriticalTails();
+
+    //e.preventDefault();
+    e.stopPropagation();
+  })
+
+  function setzSliders() {
+    oldzfrom = zfrom;
+    oldzto   = zto;
+    $zslider.slider( 'values', [zfrom, zto] );
   }
 
   function resize() {
@@ -480,8 +502,8 @@ $(function() {
     //now default the display
     zfrom = -5;
     zto = 5;
-    $zslider.update( { from: zfrom, to: zto } );
-
+    //$zslider.update( { from: zfrom, to: zto } );
+    setupzSlider();
 
     removemuline();
     removezlines();
@@ -710,14 +732,11 @@ $(function() {
     if (onetail) {
       //Park left handle to -5
       zfrom = -5;
-      oldzfrom = -5
-      $zslider.update( { from: zfrom, to: zto })
+      setzSliders();
     }
     if (twotails) {
       zfrom = -zto; //had to choose one side
-      oldzfrom = zfrom
-      oldzto = zto;
-      $zslider.update( { from: zfrom, to: zto })
+      setzSliders();
     }
     drawCriticalTails();   
   })
@@ -744,13 +763,11 @@ $(function() {
       //Park left handle to -5
       zfrom = -5;
       oldzfrom = -5
-      $zslider.update( { from: zfrom, to: zto })
+      setzSliders();
     }
     if (twotails) {
       zfrom = -zto; //had to choose one side
-      oldzfrom = zfrom
-      oldzto = zto;
-      $zslider.update( { from: zfrom, to: zto })
+      setzSliders();
     }
     drawCriticalTails();   
   })
@@ -971,96 +988,99 @@ $(function() {
 
   /*----------------------------------------------Slider panel-------------------------------------*/
 
-  function zsliderUpdate() {
-    oldzfrom = zfrom;
-    oldzto = zto;
-    $zslider.update( { from: zfrom, to: zto })
-    drawCriticalTails();
-  }
-
-  //left nudge backwards
-  $leftnudgebackward.on('mousedown', function() {
-    leftnudgebackward();
+  //from nudge backwards
+  $fromnudgebackward.on('mousedown', function() {
+    fromnudgebackward();
     pauseId = setTimeout(function() {
       repeatId = setInterval ( function() {
-        leftnudgebackward();
+        fromnudgebackward();
       }, delay );
     }, pause)  
   })
 
-  $leftnudgebackward.on('mouseup', function() {
-    clearTimeout(pauseId);
+  $fromnudgebackward.on('mouseup', function() {
     clearInterval(repeatId);
+    clearTimeout(pauseId);
   })
 
-  function leftnudgebackward() {
-    if (zfrom > -5) zfrom -= 0.001;
+  function fromnudgebackward() {
+    zfrom -= 0.001;
+    if (zfrom < -5) zfrom = -5;
     if (twotails) zto = -zfrom;
-    zsliderUpdate();
+    setzSliders();
+    drawCriticalTails();
   }
   
-  //leftnudgeforwards
-  $leftnudgeforward.on('mousedown', function() {
-    leftnudgeforward();
+  //from nudge forwards
+  $fromnudgeforward.on('mousedown', function() {
+    fromnudgeforward();
     pauseId = setTimeout(function() {
       repeatId = setInterval ( function() {
-        leftnudgeforward();
+        fromnudgeforward();
       }, delay );
     }, pause)
   })
 
-  $leftnudgeforward.on('mouseup', function() {
-    clearTimeout(pauseId);
+  $fromnudgeforward.on('mouseup', function() {
     clearInterval(repeatId);
+    clearTimeout(pauseId);
   })
 
-  function leftnudgeforward() {
-    if (zfrom < 5) zfrom += 0.001;
+  function fromnudgeforward() {
+    zfrom += 0.001;
+    if (zfrom > 5) zfrom = 5;
     if (twotails) zto = -zfrom;
-    zsliderUpdate();
+    setzSliders();
+    drawCriticalTails();
   }
 
 
-  //right nudge backwards
-  $rightnudgebackward.on('mousedown', function() {
-    rightnudgebackward();
+  //to nudge backwards
+  $tonudgebackward.on('mousedown', function() {
+    tonudgebackward();
     pauseId = setTimeout(function() {
       repeatId = setInterval ( function() {
-        rightnudgebackward();
+        tonudgebackward();
       }, delay );
     }, pause)
   })
 
-  $rightnudgebackward.on('mouseup', function() {
-    clearTimeout(pauseId);
+  $tonudgebackward.on('mouseup', function() {
     clearInterval(repeatId);
+    clearTimeout(pauseId);
   })
 
-  function rightnudgebackward() {
-    if (zto > -5) zto -= 0.001;
+  function tonudgebackward() {
+    zto -= 0.001;
+    if (zto < -5) zto = -5;
     if (twotails) zfrom = -zto;
-    zsliderUpdate();
+    setzSliders();
+    drawCriticalTails();
   }
 
-  //right nudge forward
-  $rightnudgeforward.on('mousedown', function() {
-    rightnudgeforward();
+  //to nudge forward
+  $tonudgeforward.on('mousedown', function() {
+    tonudgeforward();
     pauseId = setTimeout(function() {
       repeatId = setInterval ( function() {
-        rightnudgeforward();
+        tonudgeforward();
       }, delay );
-    }, pause)  })
-
-  $rightnudgeforward.on('mouseup', function() {
-    clearTimeout(pauseId);
-    clearInterval(repeatId);
+    }, pause)
   })
 
-  function rightnudgeforward() {
-    if (zto < 5) zto += 0.001;
+  $tonudgeforward.on('mouseup', function() {
+    clearInterval(repeatId);
+    clearTimeout(pauseId);
+  })
+
+  function tonudgeforward() {
+    zto += 0.001;
+    if (zto > 5) zto = 5;
     if (twotails) zfrom = -zto;
-    zsliderUpdate();
+    setzSliders();
+    drawCriticalTails();
   }
+
 
   /*---------------------------------------mu lines   zlines  x-axis   units-----------------------------------------------*/
 
@@ -1181,8 +1201,8 @@ $(function() {
   })
 
   $munudgebackward.on('mouseup', function() {
-    clearTimeout(pauseId);
     clearInterval(repeatId);
+    clearTimeout(pauseId);
   })
 
   function munudgebackward() {
@@ -1203,8 +1223,8 @@ $(function() {
   })
 
   $munudgeforward.on('mouseup', function() {
-    clearTimeout(pauseId);
     clearInterval(repeatId);
+    clearTimeout(pauseId);
   })
 
   function munudgeforward() {
@@ -1252,8 +1272,8 @@ $(function() {
   })
 
   $sigmanudgebackward.on('mouseup', function() {
-    clearTimeout(pauseId);
     clearInterval(repeatId);
+    clearTimeout(pauseId);
   })
 
   function sigmanudgebackward() {
@@ -1274,8 +1294,8 @@ $(function() {
   })
 
   $sigmanudgeforward.on('mouseup', function() {
-    clearTimeout(pauseId);
     clearInterval(repeatId);
+    clearTimeout(pauseId);
   })
 
   function sigmanudgeforward() {
@@ -1349,8 +1369,8 @@ $(function() {
   })
 
   $dfnudgebackward.on('mouseup', function() {
-    clearTimeout(pauseId);
     clearInterval(repeatId);
+    clearTimeout(pauseId);
   })  
 
   function dfnudgebackward() {
@@ -1371,8 +1391,8 @@ $(function() {
   })
 
   $dfnudgeforward.on('mouseup', function() {
-    clearTimeout(pauseId);
     clearInterval(repeatId);
+    clearTimeout(pauseId);
   })
 
   function dfnudgeforward() {

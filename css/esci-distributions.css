@@ -13,7 +13,7 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 0.1.15      2020-08-02 #11, #12 Fixing sliders - added some css overrides to slider to blank out left end label
 0.1.17      2020-08-03 #18 Palegreen background for panel 4
 0.1.19      2020-08-03 #18 Lighter green?
-0.1.22
+0.1.23      2020-08-05 #16 Styling for ne jquery-ui slider pips library for replacement for zslider
 
 #endregion */
 
@@ -32,17 +32,80 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 /*---------------------------------icons-----------------------------------------------------------*/
 
 .icons {
-  width: 3rem;
-  height: 3rem;
+  width: 2.5rem;
+  height: 2.5rem;
 }
 
-/*--------------------------------sliders----------------------------------------------------------*/
-
+/*--------------------------------z slider----------------------------------------------------------*/
 
 /*make text above zslider larger*/
-#zsliderdiv .irs--big .irs-from, #zsliderdiv .irs--big .irs-to, #zsliderdiv .irs--big .irs-single {
+/* #zsliderdiv .irs--big .irs-from, #zsliderdiv .irs--big .irs-to, #zsliderdiv .irs--big .irs-single {
   font-size: 1.7rem
+} */
+
+#zslider {
+  margin-top: 3.0rem;
+  margin-left: 1.0rem;
+  margin-right: 1.0rem;
+  font-size: 1.4rem;
 }
+
+/*the fill between the handles*/
+#zslider .ui-slider-range,
+#zslider .ui-slider-pip[class*=ui-slider-pip-selected] .ui-slider-line,
+#zslider .ui-slider-pip.ui-slider-pip-inrange .ui-slider-line {
+  background-image: linear-gradient(#B4D2EA, #5C9BD1);
+}
+
+/*style the handles*/
+.ui-slider-handle {
+  border-radius: 25px;
+  height: 23px;
+  width: 23px;
+  top: -7px;
+  margin-left: -11px;
+  background-image: radial-gradient(#A8B0B8, #F3F4F5 ) !important;
+}
+
+.ui-slider-handle:hover {
+  background-color: grey !important;
+}
+
+.ui-slider-handle:active {
+  background-color: darkgrey !important;
+}
+
+/*style the label*/
+#zslider .ui-slider-tip {
+  visibility: visible !important;
+  background-color: lightyellow !important;
+  padding: 0.3rem;
+
+  opacity: 1;
+  top: -30px;
+  font-size: 1.7rem;
+  width: 5.0rem;
+}
+
+/*style the tick marks*/ /*hide all ticks then reveal the ones we want - clever*/
+#zslider .ui-slider-pip .ui-slider-label {
+  display: none;
+ }
+
+#zslider .ui-slider-pip:nth-of-type(5n+3) .ui-slider-line {
+  height: 8px;
+}
+
+#zslider .ui-slider-pip:nth-of-type(10n+3) .ui-slider-line {
+  height: 12px;
+}
+
+#zslider .ui-slider-pip:nth-of-type(10n+3) .ui-slider-label {
+  top: 16px;
+  display: block;
+}
+
+
 
 /*----------------------------------control side  (set in esci.css)--------------------------------*/
 
@@ -321,7 +384,7 @@ margin-left: 0.5rem;
 
 #sliderdisplayarea {
   display: grid;
-  grid-template-columns: 3rem 3rem auto 3rem 3rem;
+  grid-template-columns: 2rem 2rem 2rem auto 2rem 2rem 2rem;
 }
 
 .slidericons {
