@@ -34,10 +34,13 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 0.1.22  2020-08-04  #12 Put limits on sliders and textboxes
 0.1.23  2020-08-05  #16 Replaced ionslider for z slider with jquery-ui and slider-pips libraries
 0.1.24  2020-08-07  #13 Added tooltips
+0.1.25  2020-08-07  #16 Had to get down and dirty to get values properly. As someone said: "the documentation is wrong!!"
+
+
 */
 //#endregion 
 
-let version = '0.1.24';
+let version = '0.1.25';
 
 'use strict';
 $(function() {
@@ -333,6 +336,51 @@ $(function() {
       range: true,
       values: [ -5, 5 ],
       step: 0.001,
+
+      slide: function(e, ui) {
+        zfrom = ui.values[0];
+        zto   = ui.values[1];
+   
+        if (notails || onetail) {
+          //do nothing
+        }
+    
+        if (twotails) {
+          //don't allow to cross
+          if (zfrom > 0 || zto < 0) {
+            zfrom = 0;
+            zto = 0;
+          }
+
+          //need to determine if from or to slider moved?
+          if (zfrom !== oldzfrom) {
+            frommoved = true;
+            oldzfrom = zfrom;
+          }
+          else {
+            frommoved = false;
+          }
+          if (zto !== oldzto) {
+            tomoved = true;
+            oldzto = zto;
+          }
+          else {
+            tomoved = false;
+          }
+          if (frommoved) zto   = -zfrom;
+          if (tomoved)   zfrom = -zto;
+        }
+
+        setzSliders();
+      },
+
+      change: function( event, ui ) {
+  
+      },
+
+      stop: function( event, ui ) {
+        setzSliders();
+      }
     });
 
     //jQuery-ui-Slider-Pips
@@ -354,53 +402,18 @@ $(function() {
     oldzto   = 5.000;
   }
 
-
-  $zslider.on( 'slide', function( e, ui ) {
-
-    zfrom = $zslider.slider( 'values', 0 );
-    zto   = $zslider.slider( 'values', 1 );
-
-    if (notails || onetail) {
-      //do nothing
-    }
-
-    if (twotails) {
-      //don't allow to cross
-      if (zfrom > 0 || zto < 0) {
-        zfrom = 0;
-        zto = 0;
-      }
-      else {
-        //need to determine if from or to slider moved?
-        if (zfrom !== oldzfrom) {
-          frommoved = true;
-          oldzfrom = zfrom;
-        }
-        else {
-          frommoved = false;
-        }
-        if (zto !== oldzto) {
-          tomoved = true;
-          oldzto = zto;
-        }
-        else {
-          tomoved = false;
-        }
-        if (frommoved) zto   = -zfrom;
-        if (tomoved)   zfrom = -zto;
-      }
-      setzSliders();
-    }
-    drawCriticalTails();
-
-    //e.preventDefault();
-    e.stopPropagation();
-  })
-
   function setzSliders() {
     oldzfrom = zfrom;
     oldzto   = zto;
-    $zslider.slider( 'values', [zfrom, zto] );
+    if (twotails) {
+      $('.ui-slider-tip').parent().children().first().text(zfrom);  //fix for display as move
+      $('.ui-slider-tip').parent().children().last().text(zto);     //fix for display as move    
+    }
+    $zslider.slider( "values", [ zfrom, zto ] );
+
+    //see if I can directly change the visual label
+
+    drawCriticalTails();
   }
 
   function resize() {
@@ -973,8 +986,6 @@ $(function() {
 
       }
     }
-
-
 
   }
 

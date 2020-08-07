@@ -14,7 +14,8 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 0.1.17  2020-08-03 #18 Palegreen background for panel 4
 0.1.19  2020-08-03 #18 Lighter green?
 0.1.23  2020-08-05 #16 Styling for ne jquery-ui slider pips library for replacement for zslider
-0.1.24  2020-08-07  #13 Added tooltips
+0.1.24  2020-08-07 #13 Added tooltips
+0.1.25  2020-08-07 #16 Moved zslider down a bit
 
 #endregion */
 
@@ -45,7 +46,7 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 } */
 
 #zslider {
-  margin-top: 3.0rem;
+  margin-top: 5.0rem;
   margin-left: 1.0rem;
   margin-right: 1.0rem;
   font-size: 1.4rem;
@@ -83,7 +84,8 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
   padding: 0.3rem;
 
   opacity: 1;
-  top: -30px;
+  top: -35px;
+  left: -3px;
   font-size: 1.7rem;
   width: 5.0rem;
 }
@@ -209,10 +211,6 @@ input[type=text] {
   background-color: #FFFF99;
   border: 1px solid black;
   height: 30rem;
-}
-
-#musigmadiv {
-
 }
 
 #musliderpanel {
@@ -400,7 +398,7 @@ margin-left: 0.5rem;
 }
 
 .slidericons {
-  margin-top: 2.4rem;
+  margin-top: 4.4rem;
 }
 
 .slidericons:hover {
