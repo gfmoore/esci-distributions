@@ -7,14 +7,14 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 -->
 <!-- #region version history-->
 <!--
-0.0.1       Initial version
-0.1.0       2020-07-25  The first version released
-0.1.1       2020-07-31  #2 Italics for Roman variable names
+0.0.1   Initial version
+0.1.0   2020-07-25  The first version released
+0.1.1   2020-07-31  #2 Italics for Roman variable names
 0.1.2
-0.1.3       2020-07-31  Changed links to cdn libraries to local libraries to allow portability
-0.1.4       2020-07-31  #9 Bottom footer link text changed to match with dances
-0.1.23      2020-08-05  #16 Added jqueryui and jquery-slider-pips for replace to old zslider
-
+0.1.3   2020-07-31  Changed links to cdn libraries to local libraries to allow portability
+0.1.4   2020-07-31  #9 Bottom footer link text changed to match with dances
+0.1.23  2020-08-05  #16 Added jqueryui and jquery-slider-pips for replace to old zslider
+0.1.24  2020-08-07  #13 Added tooltips
 -->
 <!--endregion -->
 
@@ -90,8 +90,8 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
         <!----------------------------------Main heading---------------------------------->
         <div id=header>
           <div id=logo><img id=logoimg src=./images/logo.png></div>
-          <div id=mainheading data-tooltip>esci web</div>
-          <div id=subheading data-tooltip>distributions beta</div>
+          <div id=mainheading class=headingtip data-tooltip>esci web</div>
+          <div id=subheading class=headingtip data-tooltip>distributions beta</div>
           <div id=tooltipsonoff>?</div>
         </div>
 
@@ -113,27 +113,29 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
               <!-- Normal Distribution -->
               <div id=normalpanel>
 
+<!-------------------------------------Normal tab----------------------------------------->                
+
 <!-------------------------------------1 Tails----------------------------------------->                
                 <div id=tailspanel>
-                  <span><span class=red>1 </span>Tails </span>
+                  <span class=tailstip data-tooltip><span class=red>1 </span>Tails </span>
 
                   <div id=tails>
-                    <div><input type=radio id=notails  name=tails value=notails checked><label id=labelfornotails  for=notails  data-tooltip>No tails</label></div>
+                    <div class=notailstip data-tooltip><input type=radio id=notails  name=tails value=notails checked><label id=labelfornotails  for=notails>No tails</label></div>
                     <div>
-                      <input type=radio    id=onetail  name=tails value=onetail><label id=labelforonetail  for=onetail  data-tooltip>One tail</label>
-                      <input type=checkbox id=showarea name=showarea value=showarea><label id=labelforareas for=showarea data-tooltip>Areas</label>
+                      <span class=onetailtip data-tooltip><input type=radio    id=onetail  name=tails value=onetail><label id=labelforonetail  for=onetail>One tail</label></span>
+                      <span class=areastip data-tooltip><input type=checkbox id=showarea name=showarea value=showarea><label id=labelforareas for=showarea>Areas</label></span>
                     </div>
-                    <div><input type=radio id=twotails name=tails value=twotails><label id=labelfortwotails for=twotails data-tooltip>Two tails</label></div>
+                    <div class=twotailstip data-tooltip><input type=radio id=twotails name=tails value=twotails><label id=labelfortwotails for=twotails>Two tails</label></div>
                   </div>
                 </div>
 
 <!-------------------------------------2 Lines----------------------------------------->                
 
                 <div id=lines>
-                  <span><span class=red>2 </span>Lines </span>
+                  <span class=linestip data-tooltip><span class=red>2 </span>Lines </span>
                   <div id=muzline>
-                    <input type=checkbox id=showmuline><label id=labelformuline for=showmuline data-tooltip>Mean line</label>
-                    <input type=checkbox id=showzline> <label id=labelforzline  for=showzline  data-tooltip><em>z</em> lines</label>
+                    <span class=meanlinetip data-tooltip><input type=checkbox id=showmuline><label id=labelformuline for=showmuline>Mean line</label></span>
+                    <span class=zlinestip data-tooltip><input type=checkbox id=showzline> <label id=labelforzline  for=showzline><em>z</em> lines</label></span>
                   </div>  
 
                 </div>
@@ -141,31 +143,36 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 <!-------------------------------------3 X Variable----------------------------------------->                
 
                 <div id=musigma>
-                  <span><span class=red>3 </span><em>X</em> variable </span>
+                  <span class=xvartip data-tooltip><span class=red>3 </span><em>X</em> variable </span>
 
                   <div id=Xselectdiv>
-                    <div id=showxaxisdiv><input type=checkbox id=showxaxis><label id=labelforxaxis for=showxaxis data-tooltip>Display <em>X</em> axis</label></div>
-                    <div id=unitsdiv><span id=unitsspan>Units: </span><input id=units type=text></div>
+                    <div id=showxaxisdiv class=xaxistip data-tooltip><input type=checkbox id=showxaxis><label id=labelforxaxis for=showxaxis data-tooltip>Display <em>X</em> axis</label></div>
+                    <div id=unitsdiv class=unitstip data-tooltip><span id=unitsspan>Units: </span><input id=units type=text></div>
                   </div>
 
                   <div id=musigmadiv>
-                    <div id=mudiv><span class=greek2 >&mu;</span></div>    
-                    <input id=muslider    class=musigmaslider type=text value=0 />
-                    <img id=munudgebackward class="iconsmusigma slidericons" src=./images/left.png alt='nud backwards'>
-                    <img id=munudgeforward class="iconsmusigma slidericons" src=./images/right.png alt='nudge forward'> 
-                    <input id=muval type=text>
-        
-                    <div id=sigmadiv><span class=greek2 >&sigma;</span></div>
-                    <input id=sigmaslider class=musigmaslider type=text value=0 />
-                    <img id=sigmanudgebackward class="iconsmusigma slidericons" src=./images/left.png alt='nudge backwards'>
-                    <img id=sigmanudgeforward class="iconsmusigma slidericons" src=./images/right.png alt='nudge forward'>  
-                    <input id=sigmaval type=text>
+                    <div id=musliderpanel class=muslidertip data-tooltip>
+                      <div id=mudiv><span class=greek2 >&mu;</span></div>    
+                      <input id=muslider    class=musigmaslider type=text value=0 />
+                      <img id=munudgebackward class="iconsmusigma slidericons" src=./images/left.png alt='nud backwards'>
+                      <img id=munudgeforward class="iconsmusigma slidericons" src=./images/right.png alt='nudge forward'> 
+                      <input id=muval type=text>
+                    </div>
+
+                    <div id=sigmasliderpanel class=sigmaslidertip data-tooltip>
+                      <div id=sigmadiv><span class=greek2 >&sigma;</span></div>
+                      <input id=sigmaslider class=musigmaslider type=text value=0 />
+                      <img id=sigmanudgebackward class="iconsmusigma slidericons" src=./images/left.png alt='nudge backwards'>
+                      <img id=sigmanudgeforward class="iconsmusigma slidericons" src=./images/right.png alt='nudge forward'>  
+                      <input id=sigmaval type=text>
+                    </div>
                   </div>
                 </div>
 
               </div>
             </div>
 
+<!-------------------------------------Student t tab----------------------------------------->                
 
             <!-- Student t Distribution -->
             <div id="tab-2" class="tab-pane" role="tabpane1">
@@ -173,15 +180,15 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 <!-------------------------------------4 Curves----------------------------------------->                
 
               <div id=ztselect>
-                <span><span class=red>4 </span>Curves </span>
+                <span class=curvestip data-tooltip><span class=red>4 </span>Curves </span>
 
-                <div><input type=radio id=z     name=ztdist  checked><label id=labelforz  for=z  data-tooltip><em>z</em></label></div>
-                <div><input type=radio id=t     name=ztdist ><label id=labelfort  for=t  data-tooltip><em>t</em></label></div>
-                <div><input type=radio id=zandt name=ztdist ><label id=labelforzandt for=twotails data-tooltip><em>z</em> and <em>t</em></label></div>
+                <div class=normtip data-tooltip><input type=radio id=z     name=ztdist  checked><label id=labelforz  for=z><em>z</em></label></div>
+                <div class=ztip data-tooltip><input type=radio id=t     name=ztdist ><label id=labelfort  for=t><em>t</em></label></div>
+                <div class=normandztip data-tooltip><input type=radio id=zandt name=ztdist ><label id=labelforzandt for=twotails ><em>z</em> and <em>t</em></label></div>
                 
                 <div id=df>
-                  </span>Degrees of freedom </span>
-                  <div id=dfblock>
+                  <span class=dofftip data-tooltip>Degrees of freedom </span>
+                  <div id=dfblock class=dfslidertip data-tooltip>
                     <div id=dfdiv><em>df</em></div>    
                     <input id=dfslider      class=musigmaslider type=text value=0 />
                     <img id=dfnudgebackward class="iconsmusigma slidericons" src=./images/left.png alt='nudge backwards'>
@@ -194,28 +201,27 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 <!-------------------------------------5 Tails----------------------------------------->                
 
               <div id=ttailspanel>
-                <span><span class=red>5 </span>Tails </span>
+                <span class=ttailstip data-tooltip><span class=red>5 </span>Tails </span>
 
                 <div id=ttails>
-                  <div><input type=radio id=tnotails  name=ttails checked><label id=labelfortnotails  for=tnotails>No tails</label></div>
+                  <div class=tnotailstip data-tooltip><input type=radio id=tnotails  name=ttails checked><label id=labelfortnotails  for=tnotails>No tails</label></div>
                   <div>
-                    <input type=radio    id=tonetail  name=ttails >  <label id=labelfortonetail  for=tonetail  >One tail</label>
-                    <input type=checkbox id=tshowarea name=tshowarea ><label id=labelfortareas for=tshowarea >Areas</label>
+                    <span class=tonetailtip data-tooltip><input type=radio    id=tonetail  name=ttails >  <label id=labelfortonetail  for=tonetail  >One tail</label></span>
+                    <span class=tareastip data-tooltip><input type=checkbox id=tshowarea name=tshowarea ><label id=labelfortareas for=tshowarea >Areas</label></span>
                   </div>
-                  <div><input type=radio id=ttwotails name=ttails >  <label id=labelforttwotails for=ttwotails >Two tails</label></div>
+                  <div class=ttwotailstip data-tooltip><input type=radio id=ttwotails name=ttails >  <label id=labelforttwotails for=ttwotails >Two tails</label></div>
                 </div>
               </div>
 
 <!-------------------------------------6 Lines----------------------------------------->                
 
               <div id=tlines>
-                <span><span class=red>6 </span>Lines </span>
+                <span  class=tlinestip data-tooltip><span class=red>6 </span>Lines </span>
                 <div id=tmuzline>
-                  <input type=checkbox id=tshowmuline><label id=labelfortmuline for=showtmuline >Mean line</label>
-                  <input type=checkbox id=tshowtzline><label id=labelfortzlines  for=showtzlines ><em>z</em> or <em>t </em>lines</label>
+                  <span class=tmeanlinetip data-tooltip><input type=checkbox id=tshowmuline><label id=labelfortmuline for=showtmuline >Mean line</label></span>
+                  <span class=tzlinestip data-tooltip><input type=checkbox id=tshowtzline><label id=labelfortzlines  for=showtzlines ><em>z</em> or <em>t </em>lines</label></span>
                 </div>  
               </div>
-
 
             </div>
 

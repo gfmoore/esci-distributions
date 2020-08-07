@@ -147,6 +147,8 @@ input[type=text] {
 
 /*--------------------------------------Tooltips skin for Tipped library----------------------------*/
 
+/*--------------------------------------Tooltips skin for Tipped library----------------------------*/
+
 /* skin is 'esci' */
 .tpd-skin-esci .tpd-content,
 .tpd-skin-esci .tpd-title,
@@ -173,7 +175,7 @@ input[type=text] {
 /* text size xlarge */
 .tpd-size-xlarge .tpd-content,
 .tpd-size-xlarge .tpd-title {
-  padding: 15px;
+  padding: 4px;  /*GM changed from 15*/
   font-size: 1.4rem;
   line-height: 20px;
 }
@@ -194,6 +196,34 @@ input[type=text] {
 .tpd-size-xlarge .tpd-spinner-spin { margin: 14px 0 0 22px; }
 .tpd-size-xlarge .tpd-spinner-spin,
 .tpd-size-xlarge .tpd-spinner-spin:after {
+  width: 22px;
+  height: 22px;
+}
+
+/* text size versionsize */
+.tpd-size-versionsize .tpd-content,
+.tpd-size-versionsize .tpd-title {
+  padding: 10px;  /*GM changed from 15*/
+  font-size: 1.5rem;
+  line-height: 20px;
+}
+.tpd-size-versionsize .tpd-background { border-radius: 10px; }
+.tpd-size-versionsize .tpd-stem {
+  width: 24px;
+  height: 12px;
+  margin-left: 8px; /* space from the side */
+  margin-top: 2px; /* space between stem and target */
+}
+.tpd-size-versionsize.tpd-no-radius .tpd-stem { margin-left: 10px; }
+.tpd-size-versionsize .tpd-close { margin: 11px 5px 11px 5px; }
+.tpd-size-versionsize .tpd-close-icon { font-size: 32px; }
+.tpd-size-versionsize .tpd-spinner {
+  width: 66px;
+  height: 50px;
+}
+.tpd-size-versionsize .tpd-spinner-spin { margin: 14px 0 0 22px; }
+.tpd-size-versionsize .tpd-spinner-spin,
+.tpd-size-versionsize .tpd-spinner-spin:after {
   width: 22px;
   height: 22px;
 }
