@@ -36,6 +36,7 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 0.1.24  2020-08-07  #13 Added tooltips
 0.1.25  2020-08-07  #16 Had to get down and dirty to get values properly. As someone said: "the documentation is wrong!!"
 0.1.26  2020-08-07  #16 Some more tweaking to slider appearance
+0.1.27  2020-08-07  #20 Implement breadcrumbs menu
 
 */
 //#endregion 
@@ -174,6 +175,11 @@ $(function() {
 
 
   //#endregion
+
+  //breadcrumbs
+  $('#homecrumb').on('click', function() {
+    window.location.href = "https://www.esci.thenewstatistics.com/";
+  })
 
   initialise();
 
