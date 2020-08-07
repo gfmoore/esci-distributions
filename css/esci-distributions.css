@@ -16,6 +16,7 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 0.1.23  2020-08-05 #16 Styling for ne jquery-ui slider pips library for replacement for zslider
 0.1.24  2020-08-07 #13 Added tooltips
 0.1.25  2020-08-07 #16 Moved zslider down a bit
+0.1.26  2020-08-07  #16 Some more tweaking to slider appearance
 
 #endregion */
 
@@ -52,30 +53,46 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
   font-size: 1.4rem;
 }
 
+/*background on fill outside the handles and rounded ends*/
+.ui-slider {
+  border-radius: 20px;
+  background-image: linear-gradient(lightgrey, white) !important;
+}
+
 /*the fill between the handles*/
 #zslider .ui-slider-range,
 #zslider .ui-slider-pip[class*=ui-slider-pip-selected] .ui-slider-line,
 #zslider .ui-slider-pip.ui-slider-pip-inrange .ui-slider-line {
-  background-image: linear-gradient(#B4D2EA, #5C9BD1);
+  background-image: linear-gradient(white, #5C9BD1, #B4D2EA) !important;
+}
+
+#zslider .ui-slider-range {
+  background-color: red !important;
 }
 
 /*style the handles*/
 .ui-slider-handle {
   border-radius: 25px;
-  height: 23px;
-  width: 23px;
-  top: -7px;
+  height: 28px !important;
+  width: 28px !important;
+  top: -10px !important;
   margin-left: -11px;
-  background-image: radial-gradient(#A8B0B8, #F3F4F5 ) !important;
+  background-image: radial-gradient( #A8B0B8,#F3F4F5 ) !important;
 }
 
 .ui-slider-handle:hover {
-  background-color: grey !important;
+  outline: none !important;
+  background-image: radial-gradient( grey,#F3F4F5 ) !important;
 }
 
+
 .ui-slider-handle:active {
-  background-color: darkgrey !important;
+  border: 1px solid #F3F4F5;
+  outline: none !important;
+  background-image: radial-gradient( grey,#F3F4F5 ) !important;
 }
+
+
 
 /*style the label*/
 #zslider .ui-slider-tip {
@@ -85,13 +102,14 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 
   opacity: 1;
   top: -35px;
-  left: -3px;
+  left: 2px;
   font-size: 1.7rem;
   width: 5.0rem;
 }
 
 /*style the tick marks*/ /*hide all ticks then reveal the ones we want - clever*/
 #zslider .ui-slider-pip .ui-slider-label {
+  color: blue;
   display: none;
  }
 
@@ -343,7 +361,7 @@ margin-left: 0.5rem;
 #rightpanel {
   border: 1px solid grey;
   display: grid;
-  grid-template-rows: 8rem 50% 5rem auto;
+  grid-template-rows: 8rem auto 5rem 20rem;
 }
 
 /*---------------------------------top axis---------------------------------------------------------*/
@@ -351,6 +369,7 @@ margin-left: 0.5rem;
 #topaxis {
   background-color: white;
   font-size: 1.0rem;
+  border: 1px solid green;
 }
 
 .topaxistext {
@@ -369,6 +388,7 @@ margin-left: 0.5rem;
 #bottomaxis {
   background-color: white;
   font-size: 1.0rem;
+  border: 1px solid green;
 }
 
 .bottomaxistext {
@@ -380,15 +400,10 @@ margin-left: 0.5rem;
 /*----------------------------------pdf-------------------------------------------------------------*/
 
 #pdfdisplay {
-  /* border: 1px solid red; */
+  border: 1px solid red;
   background-color: white;
 }
 
-/*---------------------------------bottom axis---------------------------------------------------------*/
-
-#bottomaxis {
-  background-color: white;
-}
 
 /*----------------------------------slider-----------------------------------------------------------*/
 

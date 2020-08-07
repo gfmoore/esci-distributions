@@ -35,12 +35,12 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 0.1.23  2020-08-05  #16 Replaced ionslider for z slider with jquery-ui and slider-pips libraries
 0.1.24  2020-08-07  #13 Added tooltips
 0.1.25  2020-08-07  #16 Had to get down and dirty to get values properly. As someone said: "the documentation is wrong!!"
-
+0.1.26  2020-08-07  #16 Some more tweaking to slider appearance
 
 */
 //#endregion 
 
-let version = '0.1.25';
+let version = '0.1.26';
 
 'use strict';
 $(function() {
@@ -143,8 +143,8 @@ $(function() {
 
   const $fromnudgebackward    = $('#fromnudgebackward')
   const $fromnudgeforward     = $('#fromnudgeforward');
-  const $tonudgebackward   = $('#tonudgebackward')
-  const $tonudgeforward    = $('#tonudgeforward');
+  const $tonudgebackward      = $('#tonudgebackward')
+  const $tonudgeforward       = $('#tonudgeforward');
 
   const $munudgebackward      = $('#munudgebackward'); 
   const $munudgeforward       = $('#munudgeforward'); 
@@ -159,7 +159,8 @@ $(function() {
   const resizeObserver = new ResizeObserver(entries => {
     entries.forEach(entry => {
       rwidth = entry.contentRect.width;
-      rHeight = entry.contentRect.height;
+      //rHeight = entry.contentRect.height;  //doesn't work
+      rheight = $('#pdfdisplay').outerHeight(true);
     });
   });
 
@@ -578,10 +579,10 @@ $(function() {
 
       //top horizontal axis
       let xAxisA = d3.axisTop(xt).tickSizeOuter(0);  //tickSizeOuter gets rid of the start and end ticks
-      svgTopAxis.append('g').attr('class', 'topaxis').style("font", "1.8rem sans-serif").attr( 'transform', 'translate(0, 40)' ).call(xAxisA);
+      svgTopAxis.append('g').attr('class', 'topaxis').style("font", "1.8rem sans-serif").attr( 'transform', 'translate(0, 42)' ).call(xAxisA);
 
       //add some text labels
-      svgTopAxis.append('text').text('X').style('font-style', 'italic').attr('class', 'topaxistext').attr('x', width/2 - 20).attr('y', 20).attr('text-anchor', 'start').attr('fill', 'black');
+      svgTopAxis.append('text').text('X').style('font-style', 'italic').attr('class', 'topaxistext').attr('x', width/2 - 20).attr('y', 16).attr('text-anchor', 'start').attr('fill', 'black');
       svgTopAxis.append('text').text(units).attr('class', 'topaxisunits').attr('x', width/2 - 70).attr('y', 70).attr('text-anchor', 'start').attr('fill', 'black');
 
       //add additional ticks
@@ -1112,8 +1113,8 @@ $(function() {
       d3.selectAll('.muline').remove();
       if (showzline) {
         //show dark grey mu line
-        svgP.append('line').attr('class', 'zlines').attr('x1', xb(0)+1).attr('y1', y(0)).attr('x2', xb(0)+1).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 2);
-        if (tab === 'Normal') svgTopAxis.append('line').attr('class', 'zlines').attr('x1', xb(0)+1).attr('y1', 40).attr('x2', xb(0)+1).attr('y2', 80).attr('stroke', 'darkgrey').attr('stroke-width', 2);
+        svgP.append('line').attr('class', 'zlines').attr('x1', xb(0)).attr('y1', y(0)).attr('x2', xb(0)).attr('y2', y(realHeight)).attr('stroke', 'darkgrey').attr('stroke-width', 2);
+        if (tab === 'Normal') svgTopAxis.append('line').attr('class', 'zlines').attr('x1', xb(0)).attr('y1', 40).attr('x2', xb(0)).attr('y2', 80).attr('stroke', 'darkgrey').attr('stroke-width', 2);
       }
     }
   }
