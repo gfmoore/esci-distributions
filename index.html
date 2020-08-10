@@ -18,6 +18,7 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 0.1.25
 0.1.26  2020-08-07  #16 Some more tweaking to slider appearance
 0.1.27  2020-08-07  #20 Implement breadcrumbs menu
+0.1.29  2020-08-10  #16 Tweak the slider handles and scale positions
 
 -->
 <!--endregion -->
@@ -252,12 +253,13 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 
         <!----------------------------------------Slider---------------------------------------------------->
         <div id=sliderdisplayarea>
-          <div></div>
-          <img id=fromnudgebackward class="icons slidericons" src=./images/left.png alt='nudge backwards'><img id=fromnudgeforward class="icons slidericons" src=./images/right.png alt='nudge forward'>
-          <!--Replaced by jQueryUI and jquery-ui-slider-pips <div id=zsliderdiv ><input id=zslider type=text value=0 /></div> -->
+
+          <div><img id=fromnudgebackward class="icons slidericons" src=./images/left.png alt='nudge backwards'></div>
+          <div><img id=fromnudgeforward class="icons slidericons" src=./images/right.png alt='nudge forward'></div>
           <div id=zslider></div>
-          <img id=tonudgebackward class="icons slidericons" src=./images/left.png alt='nudge backwards'><img id=tonudgeforward class="icons slidericons" src=./images/right.png alt='nudge forward'>
-          <div></div>
+          <div><img id=tonudgebackward class="icons slidericons" src=./images/left.png alt='nudge backwards'></div>
+          <div><img id=tonudgeforward class="icons slidericons" src=./images/right.png alt='nudge forward'></div>
+
         </div>
 
       </div>

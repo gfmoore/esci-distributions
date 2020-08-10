@@ -38,10 +38,12 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 0.1.26  2020-08-07  #16 Some more tweaking to slider appearance
 0.1.27  2020-08-07  #20 Implement breadcrumbs menu
 0.1.28  2020-08-08  #13 Italicise X, z t in tooltips
+0.1.29  2020-08-10  #16 Tweak the slider handles and scale positions
+
 */
 //#endregion 
 
-let version = '0.1.28';
+let version = '0.1.29';
 
 'use strict';
 $(function() {
