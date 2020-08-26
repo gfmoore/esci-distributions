@@ -40,11 +40,12 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 0.1.28  2020-08-08  #13 Italicise X, z t in tooltips
 0.1.29  2020-08-10  #16 Tweak the slider handles and scale positions
 0.1.30  2020-08-26  #22 lower case d in breadcrumbs
+0.1.31  2020-08-26  #21 max df now 200.
 
 */
 //#endregion 
 
-let version = '0.1.30';
+let version = '0.1.31';
 
 'use strict';
 $(function() {
@@ -294,7 +295,7 @@ $(function() {
       skin: 'big',
       type: 'single',
       min: 0,
-      max: 100,
+      max: 200,
       from: df,
       step: 1,
       grid: true,
@@ -1373,8 +1374,8 @@ $(function() {
     if (df < 1) {
       df = 1;
     }
-    if (df > 100) {
-      df = 100
+    if (df > 200) {
+      df = 200
     }
     $df.val(df);
     updateDF();
@@ -1419,7 +1420,7 @@ $(function() {
 
   function dfnudgeforward() {
     df += 1;
-    if (df > 100) df = 100;
+    if (df > 200) df = 200;
     $df.val(df);
     updateDF();
   }
@@ -1486,7 +1487,7 @@ $(function() {
     Tipped.create('.ztip',          'Display <em>t</em> distribution curve',          { skin: 'esci', size: 'xlarge', showDelay: 750, behavior: 'mouse', target: 'mouse', maxWidth: 250, hideOthers: true, hideOnClickOutside: true, hideAfter: 0 });
     Tipped.create('.normandztip',   'Display both <em>z</em> and <em>t</em> distribution curves',       { skin: 'esci', size: 'xlarge', showDelay: 750, behavior: 'mouse', target: 'mouse', maxWidth: 250, hideOthers: true, hideOnClickOutside: true, hideAfter: 0 });
     Tipped.create('.dofftip',       'Select <em>df</em> for <em>t</em>',              { skin: 'esci', size: 'xlarge', showDelay: 750, behavior: 'mouse', target: 'mouse', maxWidth: 250, hideOthers: true, hideOnClickOutside: true, hideAfter: 0 });
-    Tipped.create('.dfslidertip',   'Select <em>df</em> within 1 to 100',             { skin: 'esci', size: 'xlarge', showDelay: 750, behavior: 'mouse', target: 'mouse', maxWidth: 250, hideOthers: true, hideOnClickOutside: true, hideAfter: 0 });
+    Tipped.create('.dfslidertip',   'Select <em>df</em> within 1 to 200',             { skin: 'esci', size: 'xlarge', showDelay: 750, behavior: 'mouse', target: 'mouse', maxWidth: 250, hideOthers: true, hideOnClickOutside: true, hideAfter: 0 });
 
     //panel 5 Tails
     Tipped.create('.ttailstip',     'Select features to display',                     { skin: 'esci', size: 'xlarge', showDelay: 750, behavior: 'mouse', target: 'mouse', maxWidth: 250, hideOthers: true, hideOnClickOutside: true, hideAfter: 0 });
