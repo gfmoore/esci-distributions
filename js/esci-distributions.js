@@ -39,11 +39,12 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 0.1.27  2020-08-07  #20 Implement breadcrumbs menu
 0.1.28  2020-08-08  #13 Italicise X, z t in tooltips
 0.1.29  2020-08-10  #16 Tweak the slider handles and scale positions
+0.1.30  2020-08-26  #22 lower case d in breadcrumbs
 
 */
 //#endregion 
 
-let version = '0.1.29';
+let version = '0.1.30';
 
 'use strict';
 $(function() {
