@@ -42,10 +42,12 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 0.1.30  2020-08-26  #22 lower case d in breadcrumbs
 0.1.31  2020-08-26  #21 max df now 200.
 
+1.0.0       2020-09-03 Version 1.0.0
+
 */
 //#endregion 
 
-let version = '0.1.31';
+let version = '1.0.0';
 
 'use strict';
 $(function() {
