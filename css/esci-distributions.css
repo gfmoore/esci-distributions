@@ -23,6 +23,7 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 0.1.31
 
 1.0.0       2020-09-03 Version 1.0.0
+1.0.1       21 Oct 2020 Nudge bars somehow too low, fixed.
 
 #endregion */
 
@@ -425,7 +426,7 @@ margin-left: 0.5rem;
 
 
 .slidericons {
-  margin-top: 4.4rem;
+  margin-top: 2.5rem;
 }
 
 .slidericons:hover {
@@ -433,6 +434,18 @@ margin-left: 0.5rem;
 }
 
 .slidericons:active {
+  background-color: darkgrey;
+}
+
+.slidericonsz {
+  margin-top: 4.4rem;
+}
+
+.slidericonsz:hover {
+  background-color: lightgray;
+}
+
+.slidericonsz:active {
   background-color: darkgrey;
 }
 

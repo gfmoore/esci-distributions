@@ -43,11 +43,12 @@ Licence       GNU General Public LIcence Version 3, 29 June 2007
 0.1.31  2020-08-26  #21 max df now 200.
 
 1.0.0       2020-09-03 Version 1.0.0
+1.0.1       21 Oct 2020 Nudge bars somehow too low, fixed.
 
 */
 //#endregion 
 
-let version = '1.0.0';
+let version = '1.0.1';
 
 'use strict';
 $(function() {

@@ -1,6 +1,6 @@
 # esci-distributions
 
-## Current version 1.0.0
+## Current version 1.0.1
 
 You can see which version by hovering on the logo.
 
